@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_primal_bone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "wolfism:primal_bone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "wolfism:angel_bone"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_primal_bone"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "wolfism:angel_bone"
+    ]
+  }
+}

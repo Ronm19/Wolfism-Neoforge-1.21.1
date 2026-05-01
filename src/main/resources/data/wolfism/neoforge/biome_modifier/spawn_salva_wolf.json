@@ -1,0 +1,18 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [
+    "minecraft:dark_forest",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:grove",
+    "minecraft:windswept_forest",
+    "minecraft:cherry_grove",
+    "minecraft:plains"
+  ],
+  "spawners": {
+    "type": "wolfism:salva_wolf",
+    "weight": 8,
+    "minCount": 1,
+    "maxCount": 1
+  }
+}

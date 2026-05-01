@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:packed_ice"
+    },
+    "P": {
+      "item": "wolfism:primal_bone"
+    }
+  },
+  "pattern": [
+    " I ",
+    "IPI",
+    " I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "wolfism:frost_bone"
+  }
+}

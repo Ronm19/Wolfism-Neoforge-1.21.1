@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "G": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "P": {
+      "item": "wolfism:primal_bone"
+    }
+  },
+  "pattern": [
+    " G ",
+    "APA",
+    " G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "wolfism:lunar_bone"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:forest",
+    "minecraft:birch_forest",
+    "minecraft:grove"
+  ],
+  "spawners": {
+    "type": "wolfism:timber_wolf",
+    "weight": 10,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

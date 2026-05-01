@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "L": {
+      "item": "minecraft:lightning_rod"
+    },
+    "P": {
+      "item": "wolfism:primal_bone"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "ILI",
+    "PRP",
+    "IPI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "wolfism:charged_bone"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:bone"
+    },
+    "G": {
+      "item": "minecraft:gold_nugget"
+    }
+  },
+  "pattern": [
+    " B ",
+    "BGB",
+    " B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "wolfism:primal_bone"
+  }
+}
