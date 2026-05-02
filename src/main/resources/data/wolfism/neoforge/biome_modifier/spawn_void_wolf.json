@@ -1,0 +1,17 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [
+    "minecraft:the_end",
+    "minecraft:end_highlands",
+    "minecraft:end_midlands",
+    "minecraft:end_barrens",
+    "minecraft:small_end_islands",
+    "minecraft:deep_dark"
+  ],
+  "spawners": {
+    "type": "wolfism:void_wolf",
+    "weight": 8,
+    "minCount": 1,
+    "maxCount": 1
+  }
+}

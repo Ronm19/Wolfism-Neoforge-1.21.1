@@ -20,12 +20,15 @@ import java.util.List;
 public class ModEntitySpawns {
 
     public static final ResourceKey<BiomeModifier> ADD_END_WOLF_SPAWNS = registerKey("add_end_wolf_spawns");
+    public static final ResourceKey<BiomeModifier> ADD_VOID_WOLF_SPAWNS = registerKey("add_void_wolf_spawns");
 
     public static void bootstrap(BootstrapContext<BiomeModifier> context) {
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
 
         context.register(ADD_END_WOLF_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(biomes.getOrThrow(BiomeTags.IS_END), List.of(new MobSpawnSettings.SpawnerData(
                                         ModEntities.END_WOLF.get(), 90, 1, 3))));
+        context.register(ADD_VOID_WOLF_SPAWNS, new BiomeModifiers.AddSpawnsBiomeModifier(biomes.getOrThrow(BiomeTags.IS_END), List.of(new MobSpawnSettings.SpawnerData(
+                ModEntities.VOID_WOLF.get(), 90, 1, 3))));
     }
 
     private static ResourceKey<BiomeModifier> registerKey(String name) {

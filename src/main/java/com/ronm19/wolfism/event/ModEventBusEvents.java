@@ -5,6 +5,7 @@ import com.ronm19.wolfism.entity.ModEntities;
 import com.ronm19.wolfism.entity.custom.elemental.*;
 import com.ronm19.wolfism.entity.custom.elite.BloodWolfEntity;
 import com.ronm19.wolfism.entity.custom.elite.LunarWolfEntity;
+import com.ronm19.wolfism.entity.custom.elite.VoidWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.BlackWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.TimberWolfEntity;
@@ -61,12 +62,14 @@ public class ModEventBusEvents {
         event.put(ModEntities.CHERRY_WOLF.get(), CherryWolfEntity.createAttributes().build());
         event.put(ModEntities.ANGEL_WOLF.get(), AngelWolfEntity.createAttributes().build());
         event.put(ModEntities.END_WOLF.get(), EndWolfEntity.createAttributes().build());
+        event.put(ModEntities.WOLF_KING.get(), WolfKingEntity.createAttributes().build());
 
         // * --------------- ELITE -------------------------- * //
 
         event.put(ModEntities.BLOOD_WOLF.get(), BloodWolfEntity.createAttributes().build());
         event.put(ModEntities.LUNAR_WOLF.get(), LunarWolfEntity.createAttributes().build());
         event.put(ModEntities.SALVA_WOLF.get(), SalvaWolfEntity.createAttributes().build());
+        event.put(ModEntities.VOID_WOLF.get(), VoidWolfEntity.createAttributes().build());
     }
 
     @SubscribeEvent
@@ -95,6 +98,14 @@ public class ModEventBusEvents {
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 SalvaWolfEntity ::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
+                ModEntities.VOID_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                VoidWolfEntity ::canSpawn,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
 
@@ -153,6 +164,14 @@ public class ModEventBusEvents {
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 EndWolfEntity::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
+                ModEntities.WOLF_KING.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                WolfKingEntity::canSpawn,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
 

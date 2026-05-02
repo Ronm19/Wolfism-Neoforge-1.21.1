@@ -13,6 +13,7 @@
   "item.wolfism.angel_bone": "Angel Bone",
   "item.wolfism.lunar_bone": "Lunar Bone",
   "item.wolfism.royal_bone": "Royal Bone",
+  "item.wolfism.void_bone": "Void Bone",
 
   "item.wolfism.blood_gem": "Blood Gem",
 
@@ -82,9 +83,11 @@
   "item.wolfism.lunar_wolf_spawn_egg": "Lunar Wolf Spawn Egg",
   "entity.wolfism.lunar_wolf": "Lunar Wolf",
 
-
   "item.wolfism.salva_wolf_spawn_egg": "Salva Wolf Spawn Egg",
   "entity.wolfism.salva_wolf": "Salva Wolf",
+
+  "item.wolfism.void_wolf_spawn_egg": "Void Wolf Spawn Egg",
+  "entity.wolfism.void_wolf": "Void Wolf",
 
   // =================== CREATIVE MODE TABS ================ //
 

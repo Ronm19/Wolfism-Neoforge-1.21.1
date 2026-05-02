@@ -52,6 +52,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.LUNAR_BONE.get());
         basicItem(ModItems.BLOOD_BONE.get());
         basicItem(ModItems.ROYAL_BONE.get());
+        basicItem(ModItems.VOID_BONE.get());
 
         basicItem(ModItems.BLOOD_GEM.get());
 
@@ -61,6 +62,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(ModItems.BLOOD_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.LUNAR_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.SALVA_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.VOID_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
 
         // -------------------------- SPECIAL ----------------------------- //
 

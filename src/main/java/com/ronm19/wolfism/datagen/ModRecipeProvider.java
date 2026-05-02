@@ -161,6 +161,19 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("has_primal_bone", has(ModItems.PRIMAL_BONE.get()))
                 .save(pRecipeOutput);
 
+        // Void Bone
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.VOID_BONE.get())
+                .pattern("ESE")
+                .pattern("OPO")
+                .pattern("EAE")
+                .define('E', Items.ENDER_PEARL)
+                .define('S', Items.ECHO_SHARD)
+                .define('O', Items.OBSIDIAN)
+                .define('P', ModItems.PRIMAL_BONE.get())
+                .define('A', Items.AMETHYST_SHARD)
+                .unlockedBy("has_primal_bone", has(ModItems.PRIMAL_BONE.get()))
+                .save(pRecipeOutput);
+
 
         // Blood gem
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.BLOOD_GEM.get())

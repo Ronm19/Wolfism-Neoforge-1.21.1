@@ -118,6 +118,7 @@ public class WolfismMod {
             EntityRenderers.register(ModEntities.BLOOD_WOLF.get(), BloodWolfRenderer::new);
             EntityRenderers.register(ModEntities.LUNAR_WOLF.get(), LunarWolfRenderer::new);
             EntityRenderers.register(ModEntities.SALVA_WOLF.get(), SalvaWolfRenderer::new);
+            EntityRenderers.register(ModEntities.VOID_WOLF.get(), VoidWolfRenderer::new);
         }
     }
 }

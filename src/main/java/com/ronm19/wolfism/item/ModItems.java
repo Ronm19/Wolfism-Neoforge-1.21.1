@@ -105,6 +105,9 @@ public class ModItems {
     public static final DeferredItem<DeferredSpawnEggItem> SALVA_WOLF_SPAWN_EGG = ITEMS.register("salva_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.SALVA_WOLF, 0x3A2414, 0xC58A16, new Item.Properties()));
 
+    public static final DeferredItem<Item> VOID_WOLF_SPAWN_EGG = ITEMS.register("void_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.VOID_WOLF, 0x07040D, 0x7A4BCB, new Item.Properties()));
+
 
 
 

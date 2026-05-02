@@ -1,6 +1,5 @@
 package com.ronm19.wolfism.entity.custom.elemental;
 
-import com.ronm19.wolfism.entity.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -63,7 +62,7 @@ public class WaterWolfEntity extends Wolf {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
         super.defineSynchedData(builder);
         builder.define(NEAR_WATER, false);
         builder.define(DATA_COLLAR_COLOR, DyeColor.BLUE.getId());

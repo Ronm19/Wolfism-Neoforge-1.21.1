@@ -91,6 +91,10 @@ public class ModEntities {
             ENTITY_TYPES.register("end_wolf", () -> EntityType.Builder.of(EndWolfEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 0.85F).build("end_wolf"));
 
+    public static final Supplier<EntityType<WolfKingEntity>> WOLF_KING =
+            ENTITY_TYPES.register("wolf_king", () -> EntityType.Builder.of(WolfKingEntity::new, MobCategory.CREATURE)
+                    .sized(0.6F, 0.85F).build("wolf_king"));
+
     // ------------------------------------ ELITE WOLFS --------------------------------- //
 
     public static final Supplier<EntityType<BloodWolfEntity>> BLOOD_WOLF =
@@ -106,7 +110,7 @@ public class ModEntities {
                     .sized(0.6F, 0.85F).build("salva_wolf"));
 
     public static final Supplier<EntityType<VoidWolfEntity>> VOID_WOLF =
-            ENTITY_TYPES.register("void_wolf", () -> EntityType.Builder.of(VoidWolfEntity::new, MobCategory.CREATURE)
+            ENTITY_TYPES.register("void_wolf", () -> EntityType.Builder.of(VoidWolfEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 0.85F).build("void_wolf"));
 
     // ------------------------------------ BOSSEs --------------------------------- //

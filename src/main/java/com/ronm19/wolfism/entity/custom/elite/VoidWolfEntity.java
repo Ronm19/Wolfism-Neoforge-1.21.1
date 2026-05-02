@@ -1,8 +1,10 @@
 package com.ronm19.wolfism.entity.custom.elite;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.special.EndWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -31,6 +33,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -255,6 +258,11 @@ public class VoidWolfEntity extends Wolf {
     }
 
     private void tryVoidStep(net.minecraft.world.entity.LivingEntity target) {
+        // ✅ Sitting Void Wolf should not blink around
+        if (this.isOrderedToSit() || this.isInSittingPose()) {
+            return;
+        }
+
         if (this.voidStepCooldown > 0) {
             return;
         }
@@ -279,7 +287,12 @@ public class VoidWolfEntity extends Wolf {
             BlockPos attemptPos = basePos.offset(0, yOffset, 0);
 
             if (this.canStandAt(attemptPos)) {
-                this.performVoidStep(attemptPos.getX() + 0.5D, attemptPos.getY(), attemptPos.getZ() + 0.5D);
+                this.performVoidStep(
+                        attemptPos.getX() + 0.5D,
+                        attemptPos.getY(),
+                        attemptPos.getZ() + 0.5D
+                );
+
                 this.voidStepCooldown = VOID_STEP_COOLDOWN;
                 return;
             }
@@ -288,6 +301,11 @@ public class VoidWolfEntity extends Wolf {
 
     private void tryReturnToOwnerWithVoidStep() {
         if (!this.isTame()) {
+            return;
+        }
+
+        // ✅ Do NOT teleport to owner while sitting
+        if (this.isOrderedToSit() || this.isInSittingPose()) {
             return;
         }
 
@@ -315,7 +333,12 @@ public class VoidWolfEntity extends Wolf {
                 BlockPos finalPos = attemptPos.offset(0, yOffset, 0);
 
                 if (this.canStandAt(finalPos)) {
-                    this.performVoidStep(finalPos.getX() + 0.5D, finalPos.getY(), finalPos.getZ() + 0.5D);
+                    this.performVoidStep(
+                            finalPos.getX() + 0.5D,
+                            finalPos.getY(),
+                            finalPos.getZ() + 0.5D
+                    );
+
                     this.voidStepCooldown = VOID_STEP_COOLDOWN;
                     return;
                 }
@@ -527,18 +550,17 @@ public class VoidWolfEntity extends Wolf {
 
     public static boolean canSpawn(
             EntityType<VoidWolfEntity> type,
-            net.minecraft.world.level.ServerLevelAccessor level,
+            ServerLevelAccessor level,
             MobSpawnType spawnType,
             BlockPos pos,
             RandomSource random
     ) {
-        if (level.getLevel().dimension() == Level.END) {
-            return Mob.checkMobSpawnRules(type, level, spawnType, pos, random);
-        }
-
-        return Mob.checkMobSpawnRules(type, level, spawnType, pos, random)
-                && level.getRawBrightness(pos, 0) <= 8;
+        return level.getLevel().dimension() == Level.END
+                && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP)
+                && level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
+                && level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty();
     }
+
 
     private record LivingTargetState(@Nullable net.minecraft.world.entity.LivingEntity target) {
         private boolean hasTarget() {
