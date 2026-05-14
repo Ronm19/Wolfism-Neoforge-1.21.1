@@ -16,6 +16,7 @@
   "item.wolfism.void_bone": "Void Bone",
 
   "item.wolfism.blood_gem": "Blood Gem",
+  "item.wolfism.wolf_staff": "Wolf Staff",
 
 
   // =================== BLOCKs ================ //
@@ -88,6 +89,13 @@
 
   "item.wolfism.void_wolf_spawn_egg": "Void Wolf Spawn Egg",
   "entity.wolfism.void_wolf": "Void Wolf",
+
+
+  // =================== KING ================ //
+
+  "item.wolfism.wolf_king_spawn_egg": "Wolf King Spawn Egg",
+  "entity.wolfism.wolf_king": "Wolf King",
+
 
   // =================== CREATIVE MODE TABS ================ //
 

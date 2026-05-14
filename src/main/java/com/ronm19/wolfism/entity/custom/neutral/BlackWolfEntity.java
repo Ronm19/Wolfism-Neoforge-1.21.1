@@ -2,6 +2,7 @@ package com.ronm19.wolfism.entity.custom.neutral;
 
 import com.ronm19.wolfism.entity.ModEntities;
 import com.ronm19.wolfism.entity.ai.custom.black_wolf.BlackWolfWatchPlayerGoal;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -26,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class BlackWolfEntity extends Wolf {
+public class BlackWolfEntity extends WolfismWolfEntity {
 
     private static final EntityDataAccessor<Boolean> NIGHT_ACTIVE =
             SynchedEntityData.defineId(BlackWolfEntity.class, EntityDataSerializers.BOOLEAN);
@@ -34,7 +35,7 @@ public class BlackWolfEntity extends Wolf {
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
 
 
-    public BlackWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public BlackWolfEntity(EntityType<? extends WolfismWolfEntity > entityType, Level level) {
         super(entityType, level);
     }
 

@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -34,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class CherryWolfEntity extends Wolf {
+public class CherryWolfEntity extends WolfismWolfEntity {
 
     private static final int BLOSSOM_SURGE_COOLDOWN = 30 * 20;
     private static final int BLOSSOM_SURGE_ACTIVE_TIME = 7 * 20;
@@ -56,7 +57,7 @@ public class CherryWolfEntity extends Wolf {
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
 
-    public CherryWolfEntity( EntityType<? extends CherryWolfEntity> entityType, Level level ) {
+    public CherryWolfEntity( EntityType<? extends WolfismWolfEntity> entityType, Level level ) {
         super(entityType, level);
     }
 

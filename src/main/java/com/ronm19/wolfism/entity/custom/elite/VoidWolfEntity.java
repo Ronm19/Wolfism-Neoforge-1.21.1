@@ -1,10 +1,12 @@
 package com.ronm19.wolfism.entity.custom.elite;
 
 import com.ronm19.wolfism.entity.ModEntities;
-import com.ronm19.wolfism.entity.custom.special.EndWolfEntity;
+import com.ronm19.wolfism.entity.command.WolfismCommand;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,13 +23,16 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -37,19 +42,19 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.core.particles.ParticleTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 
-public class VoidWolfEntity extends Wolf {
+public class VoidWolfEntity extends WolfismWolfEntity {
     private static final EntityDataAccessor<Boolean> DATA_ENRAGED =
             SynchedEntityData.defineId(VoidWolfEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
-
 
     private int voidStepCooldown = 0;
     private int collapseHowlCooldown = 0;
@@ -62,7 +67,7 @@ public class VoidWolfEntity extends Wolf {
     private static final double VOID_PRESSURE_RADIUS = 5.5D;
     private static final double COLLAPSE_HOWL_RADIUS = 5.0D;
 
-    public VoidWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public VoidWolfEntity(EntityType<? extends WolfismWolfEntity> entityType, Level level) {
         super(entityType, level);
     }
 
@@ -81,16 +86,26 @@ public class VoidWolfEntity extends Wolf {
         super.defineSynchedData(builder);
         builder.define(DATA_ENRAGED, false);
         builder.define(DATA_COLLAR_COLOR, DyeColor.PURPLE.getId());
+    }
 
+    @Override
+    protected void registerGoals() {
+        super.registerGoals();
+
+        this.goalSelector.addGoal(1, new VoidWolfPressureCommandGoal(this, 1.25D, 18.0D));
     }
 
     public boolean isEnraged() {
         return this.entityData.get(DATA_ENRAGED);
-
     }
 
     public void setEnraged(boolean enraged) {
         this.entityData.set(DATA_ENRAGED, enraged);
+    }
+
+    @Override
+    public boolean supportsCommand(WolfismCommand command) {
+        return command == WolfismCommand.PRESSURE || super.supportsCommand(command);
     }
 
     @Override
@@ -150,8 +165,9 @@ public class VoidWolfEntity extends Wolf {
         this.pressureTick = 0;
 
         AABB area = this.getBoundingBox().inflate(VOID_PRESSURE_RADIUS);
-        List<net.minecraft.world.entity.LivingEntity> targets = this.level().getEntitiesOfClass(
-                net.minecraft.world.entity.LivingEntity.class,
+
+        List<LivingEntity> targets = this.level().getEntitiesOfClass(
+                LivingEntity.class,
                 area,
                 this::isValidVoidTarget
         );
@@ -163,13 +179,18 @@ public class VoidWolfEntity extends Wolf {
         this.rageTicks = Math.max(this.rageTicks, 60);
         this.setEnraged(true);
 
-        for (net.minecraft.world.entity.LivingEntity target : targets) {
+        for (LivingEntity target : targets) {
             double distance = this.distanceTo(target);
 
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0));
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
 
-            if (distance <= 3.0D && this.tickCount % 40 == 0) {
+            /*
+             * Creeper safety:
+             * Pressure can slow/weaken creepers, but the passive aura should not
+             * directly damage them at close range.
+             */
+            if (!(target instanceof Creeper) && distance <= 3.0D && this.tickCount % 40 == 0) {
                 target.hurt(this.damageSources().magic(), 1.5F);
             }
 
@@ -195,8 +216,9 @@ public class VoidWolfEntity extends Wolf {
         }
 
         AABB area = this.getBoundingBox().inflate(COLLAPSE_HOWL_RADIUS);
-        List<net.minecraft.world.entity.LivingEntity> targets = this.level().getEntitiesOfClass(
-                net.minecraft.world.entity.LivingEntity.class,
+
+        List<LivingEntity> targets = this.level().getEntitiesOfClass(
+                LivingEntity.class,
                 area,
                 this::isValidVoidTarget
         );
@@ -215,7 +237,7 @@ public class VoidWolfEntity extends Wolf {
         this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 100, 0));
         this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 80, 0));
 
-        for (net.minecraft.world.entity.LivingEntity target : targets) {
+        for (LivingEntity target : targets) {
             target.hurt(this.damageSources().magic(), 5.0F);
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1));
             target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
@@ -257,9 +279,16 @@ public class VoidWolfEntity extends Wolf {
         }
     }
 
-    private void tryVoidStep(net.minecraft.world.entity.LivingEntity target) {
-        // ✅ Sitting Void Wolf should not blink around
+    private void tryVoidStep(LivingEntity target) {
         if (this.isOrderedToSit() || this.isInSittingPose()) {
+            return;
+        }
+
+        /*
+         * Creeper safety:
+         * Void Wolf should not blink into creeper explosion range.
+         */
+        if (target instanceof Creeper) {
             return;
         }
 
@@ -304,7 +333,6 @@ public class VoidWolfEntity extends Wolf {
             return;
         }
 
-        // ✅ Do NOT teleport to owner while sitting
         if (this.isOrderedToSit() || this.isInSittingPose()) {
             return;
         }
@@ -393,7 +421,7 @@ public class VoidWolfEntity extends Wolf {
     public boolean doHurtTarget(Entity entity) {
         boolean success = super.doHurtTarget(entity);
 
-        if (success && entity instanceof net.minecraft.world.entity.LivingEntity livingEntity) {
+        if (success && entity instanceof LivingEntity livingEntity) {
             this.rageTicks = 100;
             this.setEnraged(true);
 
@@ -422,12 +450,23 @@ public class VoidWolfEntity extends Wolf {
         return success;
     }
 
-    private boolean isValidVoidTarget(net.minecraft.world.entity.LivingEntity livingEntity) {
+    private boolean isValidVoidTarget(LivingEntity livingEntity) {
+        if (livingEntity == null || !livingEntity.isAlive()) {
+            return false;
+        }
+
         if (livingEntity == this) {
             return false;
         }
 
-        if (!livingEntity.isAlive()) {
+        if (livingEntity instanceof Player) {
+            return false;
+        }
+
+        /*
+         * Void Wolf should not pressure other Wolfism wolves.
+         */
+        if (livingEntity instanceof WolfismWolfEntity) {
             return false;
         }
 
@@ -436,8 +475,11 @@ public class VoidWolfEntity extends Wolf {
                 return false;
             }
 
+            /*
+             * Avoid pressuring tamed pets. This keeps the aura safe.
+             */
             if (livingEntity instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame()) {
-                return !Objects.equals(tamableAnimal.getOwnerUUID(), this.getOwnerUUID());
+                return false;
             }
         }
 
@@ -461,7 +503,7 @@ public class VoidWolfEntity extends Wolf {
     }
 
     @Override
-    public @NotNull InteractionResult mobInteract( Player player, @NotNull InteractionHand hand) {
+    public @NotNull InteractionResult mobInteract(Player player, @NotNull InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
 
         boolean isVoidBone = stack.is(ModItems.VOID_BONE.get());
@@ -477,9 +519,10 @@ public class VoidWolfEntity extends Wolf {
 
                 if (this.random.nextFloat() < tameChance) {
                     this.tame(player);
-                    this.navigation.stop();
+                    this.getNavigation().stop();
                     this.setTarget(null);
                     this.setOrderedToSit(true);
+                    this.setInSittingPose(true);
                     this.level().broadcastEntityEvent(this, (byte) 7);
                 } else {
                     this.level().broadcastEntityEvent(this, (byte) 6);
@@ -503,7 +546,6 @@ public class VoidWolfEntity extends Wolf {
     private void setCollarColor(DyeColor collarColor) {
         this.entityData.set(DATA_COLLAR_COLOR, collarColor.getId());
     }
-
 
     @Override
     public @Nullable VoidWolfEntity getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
@@ -538,14 +580,15 @@ public class VoidWolfEntity extends Wolf {
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+
         if (tag.contains("CollarColor", 99)) {
             this.setCollarColor(DyeColor.byId(tag.getInt("CollarColor")));
-
-            this.voidStepCooldown = tag.getInt("VoidStepCooldown");
-            this.collapseHowlCooldown = tag.getInt("CollapseHowlCooldown");
-            this.rageTicks = tag.getInt("RageTicks");
-            this.setEnraged(tag.getBoolean("Enraged"));
         }
+
+        this.voidStepCooldown = tag.getInt("VoidStepCooldown");
+        this.collapseHowlCooldown = tag.getInt("CollapseHowlCooldown");
+        this.rageTicks = tag.getInt("RageTicks");
+        this.setEnraged(tag.getBoolean("Enraged"));
     }
 
     public static boolean canSpawn(
@@ -561,12 +604,320 @@ public class VoidWolfEntity extends Wolf {
                 && level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty();
     }
 
+    private static class VoidWolfPressureCommandGoal extends Goal {
+        private final VoidWolfEntity wolf;
+        private final double speedModifier;
+        private final double pressureRange;
 
-    private record LivingTargetState(@Nullable net.minecraft.world.entity.LivingEntity target) {
+        private int targetSearchCooldown;
+        private int attackCooldown;
+        private int repathCooldown;
+        private int pressureEffectCooldown;
+
+        public VoidWolfPressureCommandGoal(VoidWolfEntity wolf, double speedModifier, double pressureRange) {
+            this.wolf = wolf;
+            this.speedModifier = speedModifier;
+            this.pressureRange = pressureRange;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.wolf.isAlive()
+                    && this.wolf.isTame()
+                    && !this.wolf.isHoldingCommand()
+                    && this.wolf.isInCommand(WolfismCommand.PRESSURE)
+                    && this.wolf.getOwner() != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public void start() {
+            this.targetSearchCooldown = 0;
+            this.attackCooldown = 0;
+            this.repathCooldown = 0;
+            this.pressureEffectCooldown = 0;
+        }
+
+        @Override
+        public void stop() {
+            this.wolf.getNavigation().stop();
+            this.wolf.setTarget(null);
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity owner = this.wolf.getOwner();
+
+            if (owner == null || !owner.isAlive()) {
+                this.wolf.getNavigation().stop();
+                this.wolf.setTarget(null);
+                return;
+            }
+
+            this.tickCooldowns();
+
+            LivingEntity target = this.wolf.getTarget();
+
+            if (!this.isValidPressureTarget(target, owner)) {
+                this.wolf.setTarget(null);
+                target = null;
+
+                if (this.targetSearchCooldown <= 0) {
+                    this.targetSearchCooldown = 10;
+                    target = this.findBestPressureTarget(owner);
+                    this.wolf.setTarget(target);
+                }
+            }
+
+            if (target != null && target.isAlive()) {
+                this.moveAndPressureTarget(target, owner);
+                return;
+            }
+
+            this.stayNearOwner(owner);
+        }
+
+        private void tickCooldowns() {
+            if (this.targetSearchCooldown > 0) {
+                this.targetSearchCooldown--;
+            }
+
+            if (this.attackCooldown > 0) {
+                this.attackCooldown--;
+            }
+
+            if (this.repathCooldown > 0) {
+                this.repathCooldown--;
+            }
+
+            if (this.pressureEffectCooldown > 0) {
+                this.pressureEffectCooldown--;
+            }
+        }
+
+        @Nullable
+        private LivingEntity findBestPressureTarget(LivingEntity owner) {
+            AABB area = owner.getBoundingBox().inflate(this.pressureRange);
+
+            List<LivingEntity> targets = this.wolf.level().getEntitiesOfClass(
+                    LivingEntity.class,
+                    area,
+                    target -> this.isValidPressureTarget(target, owner)
+            );
+
+            return targets.stream()
+                    .min(Comparator
+                            .comparingDouble((LivingEntity target) -> this.getPressurePriorityScore(target, owner))
+                            .thenComparingDouble(this.wolf::distanceToSqr))
+                    .orElse(null);
+        }
+
+        private boolean isValidPressureTarget(@Nullable LivingEntity target, LivingEntity owner) {
+            if (target == null || !target.isAlive()) {
+                return false;
+            }
+
+            if (target == this.wolf || target == owner) {
+                return false;
+            }
+
+            if (target instanceof Player) {
+                return false;
+            }
+
+            if (target instanceof WolfismWolfEntity) {
+                return false;
+            }
+
+            if (!(target instanceof Enemy)) {
+                return false;
+            }
+
+            if (!this.wolf.canWolfismTarget(target, false)) {
+                return false;
+            }
+
+            return target.distanceToSqr(owner) <= this.pressureRange * this.pressureRange;
+        }
+
+        private double getPressurePriorityScore(LivingEntity target, LivingEntity owner) {
+            double score = target.distanceToSqr(owner);
+
+            if (target instanceof Creeper) {
+                score -= 120.0D;
+
+                if (target.distanceToSqr(owner) <= 64.0D) {
+                    score -= 160.0D;
+                }
+            }
+
+            if (target instanceof Monster monster) {
+                LivingEntity monsterTarget = monster.getTarget();
+
+                if (monsterTarget == owner) {
+                    score -= 240.0D;
+                }
+
+                if (monsterTarget instanceof TamableAnimal tamable
+                        && tamable.isTame()
+                        && Objects.equals(tamable.getOwnerUUID(), this.wolf.getOwnerUUID())) {
+                    score -= 160.0D;
+                }
+
+                if (monsterTarget == this.wolf) {
+                    score -= 100.0D;
+                }
+            }
+
+            if (target.distanceToSqr(owner) <= 25.0D) {
+                score -= 80.0D;
+            }
+
+            return score;
+        }
+
+        private void moveAndPressureTarget(LivingEntity target, LivingEntity owner) {
+            this.wolf.rageTicks = Math.max(this.wolf.rageTicks, 80);
+            this.wolf.setEnraged(true);
+            this.wolf.getLookControl().setLookAt(target, 30.0F, 30.0F);
+
+            if (target instanceof Creeper) {
+                this.handleCreeperPressure(target, owner);
+                return;
+            }
+
+            if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                this.repathCooldown = 8;
+                this.wolf.getNavigation().moveTo(target, this.speedModifier);
+            }
+
+            if (this.wolf.distanceToSqr(target) <= 25.0D) {
+                this.applyPressureEffects(target);
+            }
+
+            if (this.wolf.distanceToSqr(target) <= this.getAttackReachSqr(target)
+                    && this.attackCooldown <= 0) {
+                this.attackCooldown = 20;
+                this.applyPressureEffects(target);
+                this.wolf.doHurtTarget(target);
+            }
+        }
+
+        private void handleCreeperPressure(LivingEntity target, LivingEntity owner) {
+            double distanceToCreeperSqr = this.wolf.distanceToSqr(target);
+            double distanceToOwnerSqr = target.distanceToSqr(owner);
+
+            /*
+             * If a creeper threatens the owner, suppress it.
+             */
+            if (distanceToOwnerSqr <= 100.0D || distanceToCreeperSqr <= 49.0D) {
+                this.applyPressureEffects(target);
+            }
+
+            /*
+             * Too close: retreat instead of melee.
+             */
+            if (distanceToCreeperSqr <= 16.0D) {
+                this.retreatFromCreeper(target, owner);
+                return;
+            }
+
+            /*
+             * Safe pressure distance:
+             * Move closer if far, but stop before melee/explosion range.
+             */
+            if (distanceToCreeperSqr > 49.0D) {
+                if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                    this.repathCooldown = 8;
+                    this.wolf.getNavigation().moveTo(target, this.speedModifier);
+                }
+            } else {
+                this.wolf.getNavigation().stop();
+            }
+        }
+
+        private void retreatFromCreeper(LivingEntity target, LivingEntity owner) {
+            Vec3 away = this.wolf.position().subtract(target.position());
+
+            if (away.lengthSqr() < 0.001D) {
+                away = owner.position().subtract(target.position());
+            }
+
+            if (away.lengthSqr() < 0.001D) {
+                away = new Vec3(1.0D, 0.0D, 0.0D);
+            }
+
+            away = away.normalize().scale(5.0D);
+
+            Vec3 retreatPos = this.wolf.position().add(away);
+
+            if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                this.repathCooldown = 8;
+                this.wolf.getNavigation().moveTo(
+                        retreatPos.x,
+                        retreatPos.y,
+                        retreatPos.z,
+                        this.speedModifier
+                );
+            }
+        }
+
+        private void applyPressureEffects(LivingEntity target) {
+            if (this.pressureEffectCooldown > 0) {
+                return;
+            }
+
+            this.pressureEffectCooldown = 20;
+
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0, false, true));
+            target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0, false, true));
+
+            if (this.wolf.level() instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(
+                        ParticleTypes.PORTAL,
+                        target.getX(),
+                        target.getY() + 0.7D,
+                        target.getZ(),
+                        10,
+                        0.25D,
+                        0.35D,
+                        0.25D,
+                        0.02D
+                );
+            }
+        }
+
+        private void stayNearOwner(LivingEntity owner) {
+            double distanceToOwnerSqr = this.wolf.distanceToSqr(owner);
+
+            if (distanceToOwnerSqr > 49.0D) {
+                if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                    this.repathCooldown = 10;
+                    this.wolf.getNavigation().moveTo(owner, this.speedModifier);
+                }
+            } else {
+                this.wolf.getNavigation().stop();
+                this.wolf.getLookControl().setLookAt(owner, 20.0F, 20.0F);
+            }
+        }
+
+        private double getAttackReachSqr(LivingEntity target) {
+            double attackReach = this.wolf.getBbWidth() * 2.25D + target.getBbWidth();
+            return attackReach * attackReach;
+        }
+    }
+
+    private record LivingTargetState(@Nullable LivingEntity target) {
         private boolean hasTarget() {
             return this.target != null && this.target.isAlive();
         }
     }
+
     static {
         DATA_COLLAR_COLOR = SynchedEntityData.defineId(VoidWolfEntity.class, EntityDataSerializers.INT);
     }

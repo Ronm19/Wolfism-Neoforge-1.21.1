@@ -2,6 +2,7 @@ package com.ronm19.wolfism.item;
 
 import com.ronm19.wolfism.WolfismMod;
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.item.custom.WolfStaffItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.bus.api.IEventBus;
@@ -34,6 +35,8 @@ public class ModItems {
 
     // ------------------------------------------ TOOLS ---------------------------------------------------- //
 
+    public static final DeferredItem<Item> WOLF_STAFF = ITEMS.register("wolf_staff",
+            () -> new WolfStaffItem(new Item.Properties().stacksTo(1)));
 
 
     // ------------------------------------------ ARMORS ---------------------------------------------------- //
@@ -107,6 +110,11 @@ public class ModItems {
 
     public static final DeferredItem<Item> VOID_WOLF_SPAWN_EGG = ITEMS.register("void_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.VOID_WOLF, 0x07040D, 0x7A4BCB, new Item.Properties()));
+
+    // -------------------------------- THE KING ------------------------- //
+
+    public static final DeferredItem<Item> WOLF_KING_SPAWN_EGG = ITEMS.register("wolf_king_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.WOLF_KING, 0x6E6454, 0xC28A2E, new Item.Properties()));
 
 
 

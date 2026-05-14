@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.elemental;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -26,7 +27,7 @@ import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class EarthWolfEntity extends Wolf {
+public class EarthWolfEntity extends WolfismWolfEntity {
 
     // ===== DATA =====
     private static final EntityDataAccessor<Integer> TRUST =
@@ -39,12 +40,12 @@ public class EarthWolfEntity extends Wolf {
     private static final int TRUST_PER_BONE = 25;
     private static final int TRUST_TO_TAME = 75;
 
-    public EarthWolfEntity(EntityType<? extends Wolf> type, Level level) {
+    public EarthWolfEntity(EntityType<? extends WolfismWolfEntity > type, Level level) {
         super(type, level);
     }
 
     // ===== ATTRIBUTES =====
-    public static AttributeSupplier.Builder createAttributes() {
+    public static AttributeSupplier.@NotNull Builder createAttributes() {
         return Wolf.createAttributes()
                 .add(Attributes.MAX_HEALTH, 24.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.29D)
@@ -97,7 +98,7 @@ public class EarthWolfEntity extends Wolf {
     }
 
     // ===== COLLAR =====
-    public DyeColor getCollarColor() {
+    public @NotNull DyeColor getCollarColor() {
         return DyeColor.byId(this.entityData.get(DATA_COLLAR_COLOR));
     }
 

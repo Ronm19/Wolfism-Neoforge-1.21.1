@@ -2,6 +2,8 @@ package com.ronm19.wolfism.entity.custom.elite;
 
 import com.ronm19.wolfism.entity.ModEntities;
 import com.ronm19.wolfism.entity.client.renderer.BloodWolfRenderer;
+import com.ronm19.wolfism.entity.command.WolfismCommand;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.entity.custom.elemental.FireWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
@@ -21,19 +23,27 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.*;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 
-public class BloodWolfEntity extends Wolf {
+public class BloodWolfEntity extends WolfismWolfEntity {
     private static final EntityDataAccessor<Boolean> BLOOD_FRENZY =
             SynchedEntityData.defineId(BloodWolfEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -45,7 +55,7 @@ public class BloodWolfEntity extends Wolf {
     private int bloodFrenzyTicks;
     private int ownerProtectionCooldown;
 
-    public BloodWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public BloodWolfEntity(EntityType<? extends WolfismWolfEntity > entityType, Level level) {
         super(entityType, level);
     }
 
@@ -68,7 +78,8 @@ public class BloodWolfEntity extends Wolf {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new BloodWolfHuntCommandGoal(this, 1.35D, 20.0D));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(3, new BloodWolfOwnerProtectionGoal(this));
         this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.45F));
@@ -118,6 +129,11 @@ public class BloodWolfEntity extends Wolf {
                 Objects.requireNonNull(this.getAttribute(Attributes.ATTACK_DAMAGE)).setBaseValue(6.0D);
             }
         }
+    }
+
+    @Override
+    public boolean supportsCommand(WolfismCommand command) {
+        return command == WolfismCommand.HUNT || super.supportsCommand(command);
     }
 
     @Override
@@ -289,6 +305,330 @@ public class BloodWolfEntity extends Wolf {
                 wolf.activateBloodFrenzy();
                 wolf.startOwnerProtectionCooldown();
             }
+        }
+    }
+
+    private static class BloodWolfHuntCommandGoal extends Goal {
+        private final BloodWolfEntity wolf;
+        private final double speedModifier;
+        private final double huntRange;
+
+        private int targetSearchCooldown;
+        private int attackCooldown;
+        private int repathCooldown;
+        private int noTargetMoveCooldown;
+        private int stuckTicks;
+        private Vec3 lastPosition = Vec3.ZERO;
+
+        public BloodWolfHuntCommandGoal(BloodWolfEntity wolf, double speedModifier, double huntRange) {
+            this.wolf = wolf;
+            this.speedModifier = speedModifier;
+            this.huntRange = huntRange;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.wolf.isAlive()
+                    && this.wolf.isTame()
+                    && !this.wolf.isHoldingCommand()
+                    && this.wolf.isInCommand(WolfismCommand.HUNT);
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public void start() {
+            this.targetSearchCooldown = 0;
+            this.attackCooldown = 0;
+            this.repathCooldown = 0;
+            this.noTargetMoveCooldown = 0;
+            this.stuckTicks = 0;
+            this.lastPosition = this.wolf.position();
+        }
+
+        @Override
+        public void stop() {
+            this.wolf.getNavigation().stop();
+            this.stuckTicks = 0;
+        }
+
+        @Override
+        public void tick() {
+            this.tickCooldowns();
+
+            LivingEntity target = this.wolf.getTarget();
+
+            if (!this.isValidActiveTarget(target)) {
+                target = this.tryFindNewTarget();
+            }
+
+            if (target == null) {
+                this.wolf.setTarget(null);
+                this.doNoTargetMovement();
+                return;
+            }
+
+            this.wolf.setTarget(target);
+            this.wolf.getLookControl().setLookAt(target, 30.0F, 30.0F);
+
+            this.moveTowardTarget(target);
+            this.checkIfStuck(target);
+            this.tryAttackTarget(target);
+        }
+
+        private void tickCooldowns() {
+            if (this.targetSearchCooldown > 0) {
+                this.targetSearchCooldown--;
+            }
+
+            if (this.attackCooldown > 0) {
+                this.attackCooldown--;
+            }
+
+            if (this.repathCooldown > 0) {
+                this.repathCooldown--;
+            }
+
+            if (this.noTargetMoveCooldown > 0) {
+                this.noTargetMoveCooldown--;
+            }
+        }
+
+        private boolean isValidActiveTarget(@Nullable LivingEntity target) {
+            if (target == null || !target.isAlive()) {
+                return false;
+            }
+
+            if (!this.canBloodWolfHuntTarget(target)) {
+                return false;
+            }
+
+            /*
+             * If the target is way outside the hunt range, drop it.
+             * This prevents the wolf from obsessing over an unreachable target forever.
+             */
+            double maxChaseRange = this.huntRange + 10.0D;
+            return this.wolf.distanceToSqr(target) <= maxChaseRange * maxChaseRange;
+        }
+
+        @Nullable
+        private LivingEntity tryFindNewTarget() {
+            if (this.targetSearchCooldown > 0) {
+                return null;
+            }
+
+            this.targetSearchCooldown = 12;
+
+            LivingEntity target = this.findBestBloodWolfTarget();
+
+            if (target != null) {
+                this.stuckTicks = 0;
+                this.repathCooldown = 0;
+            }
+
+            return target;
+        }
+
+        private void moveTowardTarget(LivingEntity target) {
+            if (this.repathCooldown > 0 && !this.wolf.getNavigation().isDone()) {
+                return;
+            }
+
+            this.repathCooldown = 8;
+
+            double finalSpeed = this.getHuntSpeed(target);
+            boolean pathStarted = this.wolf.getNavigation().moveTo(target, finalSpeed);
+
+            /*
+             * If pathing fails immediately, don't let the wolf freeze.
+             * Drop the target soon and force a new search/movement attempt.
+             */
+            if (!pathStarted && this.wolf.distanceToSqr(target) > this.getAttackReachSqr(target)) {
+                this.stuckTicks += 10;
+            }
+        }
+
+        private void checkIfStuck(LivingEntity target) {
+            if (this.wolf.distanceToSqr(target) <= this.getAttackReachSqr(target)) {
+                this.stuckTicks = 0;
+                this.lastPosition = this.wolf.position();
+                return;
+            }
+
+            double movedDistance = this.wolf.position().distanceToSqr(this.lastPosition);
+
+            if (movedDistance < 0.003D && !this.wolf.getNavigation().isDone()) {
+                this.stuckTicks++;
+            } else {
+                this.stuckTicks = 0;
+            }
+
+            this.lastPosition = this.wolf.position();
+
+            /*
+             * If stuck for about 2 seconds, drop the target and search again.
+             * This fixes the "standing still and thinking" behavior.
+             */
+            if (this.stuckTicks >= 40) {
+                this.wolf.setTarget(null);
+                this.wolf.getNavigation().stop();
+
+                this.stuckTicks = 0;
+                this.targetSearchCooldown = 4;
+                this.repathCooldown = 0;
+                this.noTargetMoveCooldown = 0;
+            }
+        }
+
+        private void tryAttackTarget(LivingEntity target) {
+            if (this.wolf.distanceToSqr(target) <= this.getAttackReachSqr(target)
+                    && this.attackCooldown <= 0) {
+                this.attackCooldown = this.getAttackCooldown(target);
+                this.wolf.doHurtTarget(target);
+            }
+        }
+
+        /*
+         * When no target exists, the Blood Wolf should not freeze.
+         * It either stays near the owner or prowls around briefly.
+         */
+        private void doNoTargetMovement() {
+            LivingEntity owner = this.wolf.getOwner();
+
+            if (owner != null && owner.isAlive() && this.wolf.distanceToSqr(owner) > 144.0D) {
+                this.wolf.getNavigation().moveTo(owner, 1.15D);
+                return;
+            }
+
+            if (this.noTargetMoveCooldown > 0) {
+                return;
+            }
+
+            this.noTargetMoveCooldown = 35 + this.wolf.getRandom().nextInt(25);
+
+            Vec3 wanderPos = DefaultRandomPos.getPos(this.wolf, 10, 5);
+
+            if (wanderPos != null) {
+                this.wolf.getNavigation().moveTo(
+                        wanderPos.x,
+                        wanderPos.y,
+                        wanderPos.z,
+                        this.speedModifier * 0.75D
+                );
+            } else {
+                this.wolf.getNavigation().stop();
+            }
+        }
+
+        @Nullable
+        private LivingEntity findBestBloodWolfTarget() {
+            AABB area = this.wolf.getBoundingBox().inflate(this.huntRange);
+
+            List<LivingEntity> targets = this.wolf.level().getEntitiesOfClass(
+                    LivingEntity.class,
+                    area,
+                    this::canBloodWolfHuntTarget
+            );
+
+            return targets.stream()
+                    .min(Comparator
+                            .comparingDouble(this::getBloodPriorityScore)
+                            .thenComparingDouble(this.wolf::distanceToSqr))
+                    .orElse(null);
+        }
+
+        private boolean canBloodWolfHuntTarget(LivingEntity target) {
+            if (target == null || !target.isAlive()) {
+                return false;
+            }
+
+            if (target == this.wolf) {
+                return false;
+            }
+
+            /*
+             * Extra safety:
+             * Blood Wolves should never hunt Wolfism wolves,
+             * including untamed Blood Wolves.
+             */
+            if (target instanceof WolfismWolfEntity) {
+                return false;
+            }
+
+            LivingEntity owner = this.wolf.getOwner();
+            if (owner != null && target == owner) {
+                return false;
+            }
+
+            if (target instanceof Player) {
+                return false;
+            }
+
+            /*
+             * allowAnimals = true because Blood Wolf hunt mode is allowed
+             * to chase normal animals as part of its aggressive hunter identity.
+             */
+            return this.wolf.canWolfismTarget(target, true);
+        }
+
+        /*
+         * Lower score = higher priority.
+         *
+         * Blood Wolf prefers:
+         * 1. wounded enemies
+         * 2. monsters
+         * 3. nearby animals
+         */
+        private double getBloodPriorityScore(LivingEntity target) {
+            double missingHealth = target.getMaxHealth() - target.getHealth();
+            double healthPercent = target.getHealth() / target.getMaxHealth();
+
+            double score = this.wolf.distanceToSqr(target) * 0.05D;
+
+            if (target instanceof Monster) {
+                score -= 30.0D;
+            }
+
+            if (target instanceof Animal) {
+                score -= 5.0D;
+            }
+
+            score -= missingHealth * 4.0D;
+
+            if (healthPercent <= 0.35F) {
+                score -= 45.0D;
+            }
+
+            return score;
+        }
+
+        private double getHuntSpeed(LivingEntity target) {
+            float healthPercent = target.getHealth() / target.getMaxHealth();
+
+            if (healthPercent <= 0.35F) {
+                return this.speedModifier + 0.25D;
+            }
+
+            return this.speedModifier;
+        }
+
+        private int getAttackCooldown(LivingEntity target) {
+            float healthPercent = target.getHealth() / target.getMaxHealth();
+
+            if (healthPercent <= 0.35F) {
+                return 14;
+            }
+
+            return 20;
+        }
+
+        private double getAttackReachSqr(LivingEntity target) {
+            double attackReach = this.wolf.getBbWidth() * 2.4D + target.getBbWidth();
+            return attackReach * attackReach;
         }
     }
 }

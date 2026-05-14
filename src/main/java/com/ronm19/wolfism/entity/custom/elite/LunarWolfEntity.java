@@ -1,6 +1,8 @@
 package com.ronm19.wolfism.entity.custom.elite;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.command.WolfismCommand;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -30,6 +32,16 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
+import com.ronm19.wolfism.entity.command.WolfismCommand;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
+
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,12 +49,12 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class LunarWolfEntity extends Wolf {
+public class LunarWolfEntity extends WolfismWolfEntity  {
     private int ownerBuffCooldown = 0;
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(LunarWolfEntity.class, EntityDataSerializers.INT);
 
-    public LunarWolfEntity( EntityType<? extends Wolf> entityType, Level level ) {
+    public LunarWolfEntity( EntityType<? extends WolfismWolfEntity> entityType, Level level ) {
         super(entityType, level);
     }
 
@@ -59,6 +71,7 @@ public class LunarWolfEntity extends Wolf {
         super.registerGoals();
 
         // Special Lunar Wolf support ability.
+        this.goalSelector.addGoal(1, new LunarWolfNightWatchCommandGoal(this, 1.25D));
         this.goalSelector.addGoal(3, new LunarHowlGoal(this));
     }
 
@@ -67,6 +80,11 @@ public class LunarWolfEntity extends Wolf {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_COLLAR_COLOR, DyeColor.WHITE.getId());
+    }
+
+    @Override
+    public boolean supportsCommand( WolfismCommand command) {
+        return command == WolfismCommand.NIGHT_WATCH || super.supportsCommand(command);
     }
 
     @Override
@@ -291,5 +309,228 @@ public class LunarWolfEntity extends Wolf {
         }
 
         this.readPersistentAngerSaveData(this.level(), compound);
+    }
+
+    private static class LunarWolfNightWatchCommandGoal extends Goal {
+        private final LunarWolfEntity wolf;
+        private final double speedModifier;
+
+        private int targetSearchCooldown;
+        private int attackCooldown;
+        private int repathCooldown;
+
+        public LunarWolfNightWatchCommandGoal(LunarWolfEntity wolf, double speedModifier) {
+            this.wolf = wolf;
+            this.speedModifier = speedModifier;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.wolf.isAlive()
+                    && this.wolf.isTame()
+                    && !this.wolf.isHoldingCommand()
+                    && this.wolf.isInCommand(WolfismCommand.NIGHT_WATCH)
+                    && this.wolf.getOwner() != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public void start() {
+            this.targetSearchCooldown = 0;
+            this.attackCooldown = 0;
+            this.repathCooldown = 0;
+        }
+
+        @Override
+        public void stop() {
+            this.wolf.getNavigation().stop();
+            this.wolf.setTarget(null);
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity owner = this.wolf.getOwner();
+
+            if (owner == null || !owner.isAlive()) {
+                this.wolf.getNavigation().stop();
+                this.wolf.setTarget(null);
+                return;
+            }
+
+            this.tickCooldowns();
+
+            LivingEntity target = this.wolf.getTarget();
+
+            if (!this.isValidNightWatchTarget(target, owner)) {
+                this.wolf.setTarget(null);
+                target = null;
+
+                if (this.targetSearchCooldown <= 0) {
+                    this.targetSearchCooldown = this.isNightWatchStrong() ? 10 : 18;
+                    target = this.findBestNightWatchTarget(owner);
+                    this.wolf.setTarget(target);
+                }
+            }
+
+            if (target != null && target.isAlive()) {
+                this.moveAndAttackTarget(target);
+                return;
+            }
+
+            this.stayNearOwner(owner);
+        }
+
+        private void tickCooldowns() {
+            if (this.targetSearchCooldown > 0) {
+                this.targetSearchCooldown--;
+            }
+
+            if (this.attackCooldown > 0) {
+                this.attackCooldown--;
+            }
+
+            if (this.repathCooldown > 0) {
+                this.repathCooldown--;
+            }
+        }
+
+        private boolean isNightWatchStrong() {
+            return this.wolf.level().isNight()
+                    || this.wolf.level().getRawBrightness(this.wolf.blockPosition(), 0) <= 7;
+        }
+
+        private double getDetectRange() {
+            return this.isNightWatchStrong() ? 24.0D : 13.0D;
+        }
+
+        private double getFinalSpeed() {
+            return this.isNightWatchStrong() ? this.speedModifier + 0.15D : this.speedModifier;
+        }
+
+        private int getFinalAttackCooldown() {
+            return this.isNightWatchStrong() ? 17 : 21;
+        }
+
+        private LivingEntity findBestNightWatchTarget(LivingEntity owner) {
+            double detectRange = this.getDetectRange();
+            AABB area = owner.getBoundingBox().inflate(detectRange);
+
+            List<LivingEntity> targets = this.wolf.level().getEntitiesOfClass(
+                    LivingEntity.class,
+                    area,
+                    target -> this.isValidNightWatchTarget(target, owner)
+            );
+
+            return targets.stream()
+                    .min(Comparator
+                            .comparingDouble((LivingEntity target) -> this.getNightWatchPriorityScore(target, owner))
+                            .thenComparingDouble(this.wolf::distanceToSqr))
+                    .orElse(null);
+        }
+
+        private boolean isValidNightWatchTarget(LivingEntity target, LivingEntity owner) {
+            if (target == null || !target.isAlive()) {
+                return false;
+            }
+
+            if (target == this.wolf) {
+                return false;
+            }
+
+            if (target == owner) {
+                return false;
+            }
+
+            if (target instanceof Player) {
+                return false;
+            }
+
+            if (!(target instanceof Monster)) {
+                return false;
+            }
+
+            if (!this.wolf.canWolfismTarget(target, false)) {
+                return false;
+            }
+
+            double detectRange = this.getDetectRange();
+
+            return target.distanceToSqr(owner) <= detectRange * detectRange;
+        }
+
+        /*
+         * Lower score = higher priority.
+         *
+         * Lunar Wolf prefers:
+         * 1. monsters targeting owner
+         * 2. monsters close to owner
+         * 3. monsters targeting the Lunar Wolf
+         * 4. darkness/night threats
+         */
+        private double getNightWatchPriorityScore(LivingEntity target, LivingEntity owner) {
+            double score = target.distanceToSqr(owner);
+
+            if (target instanceof Monster monster) {
+                if (monster.getTarget() == owner) {
+                    score -= 250.0D;
+                }
+
+                if (monster.getTarget() == this.wolf) {
+                    score -= 100.0D;
+                }
+            }
+
+            if (target.distanceToSqr(owner) <= 25.0D) {
+                score -= 80.0D;
+            }
+
+            if (this.isNightWatchStrong()) {
+                score -= 35.0D;
+            }
+
+            return score;
+        }
+
+        private void moveAndAttackTarget(LivingEntity target) {
+            this.wolf.getLookControl().setLookAt(target, 30.0F, 30.0F);
+
+            if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                this.repathCooldown = 8;
+                this.wolf.getNavigation().moveTo(target, this.getFinalSpeed());
+            }
+
+            if (this.wolf.distanceToSqr(target) <= this.getAttackReachSqr(target)
+                    && this.attackCooldown <= 0) {
+                this.attackCooldown = this.getFinalAttackCooldown();
+                this.wolf.doHurtTarget(target);
+            }
+        }
+
+        private void stayNearOwner(LivingEntity owner) {
+            double distanceToOwner = this.wolf.distanceToSqr(owner);
+
+            /*
+             * Lunar Wolf should feel like a focused guard, not a wandering hunter.
+             */
+            if (distanceToOwner > 49.0D) {
+                if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                    this.repathCooldown = 10;
+                    this.wolf.getNavigation().moveTo(owner, this.speedModifier);
+                }
+            } else {
+                this.wolf.getNavigation().stop();
+                this.wolf.getLookControl().setLookAt(owner, 20.0F, 20.0F);
+            }
+        }
+
+        private double getAttackReachSqr(LivingEntity target) {
+            double attackReach = this.wolf.getBbWidth() * 2.25D + target.getBbWidth();
+            return attackReach * attackReach;
+        }
     }
 }

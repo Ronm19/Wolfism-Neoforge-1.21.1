@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -53,7 +54,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
-public class SpiritWolfEntity extends Wolf {
+public class SpiritWolfEntity extends WolfismWolfEntity {
 
     private static final int SPIRIT_VEIL_COOLDOWN_TICKS = 40 * 20;
     private static final int SPIRIT_VEIL_DURATION_TICKS = 8 * 20;
@@ -64,7 +65,7 @@ public class SpiritWolfEntity extends Wolf {
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
 
 
-    public SpiritWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public SpiritWolfEntity(EntityType<? extends WolfismWolfEntity > entityType, Level level) {
         super(entityType, level);
     }
 

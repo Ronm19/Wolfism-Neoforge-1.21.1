@@ -3,11 +3,13 @@ package com.ronm19.wolfism.entity.client.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.ronm19.wolfism.WolfismMod;
 import com.ronm19.wolfism.entity.client.renderer.layer.WolfKingEyesLayer;
-import com.ronm19.wolfism.entity.custom.special.WolfKingEntity;
+import com.ronm19.wolfism.entity.custom.elite.WolfKingEntity;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.WolfRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.Wolf;
+import org.jetbrains.annotations.NotNull;
 
 public class WolfKingRenderer extends WolfRenderer {
     private static final ResourceLocation NORMAL_TEXTURE =
@@ -22,12 +24,17 @@ public class WolfKingRenderer extends WolfRenderer {
     }
 
     @Override
-    public ResourceLocation getTextureLocation(Wolf entity) {
+    public @NotNull ResourceLocation getTextureLocation( @NotNull Wolf entity) {
         if (entity instanceof WolfKingEntity wolfKing && wolfKing.isRoyalRageActive()) {
             return ROYAL_RAGE_TEXTURE;
         }
 
         return NORMAL_TEXTURE;
+    }
+
+    @Override
+    public void render( Wolf entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight ) {
+        super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
 
     @Override

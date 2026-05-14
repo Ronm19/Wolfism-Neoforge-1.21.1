@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.elemental;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -45,7 +46,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 
-public class FireWolfEntity extends Wolf {
+public class FireWolfEntity extends WolfismWolfEntity {
 
     private static final EntityDataAccessor<Boolean> HEATED =
             SynchedEntityData.defineId(FireWolfEntity.class, EntityDataSerializers.BOOLEAN);
@@ -55,7 +56,7 @@ public class FireWolfEntity extends Wolf {
 
     private int packCallCooldown = 0;
 
-    public FireWolfEntity(EntityType<? extends Wolf> type, Level level) {
+    public FireWolfEntity(EntityType<? extends WolfismWolfEntity > type, Level level) {
         super(type, level);
         this.setPathfindingMalus(PathType.WATER, -1.0F);
     }

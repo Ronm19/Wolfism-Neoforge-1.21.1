@@ -1,6 +1,8 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.command.WolfismCommand;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -32,11 +34,23 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import com.ronm19.wolfism.entity.command.WolfismCommand;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 
+import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class SalvaWolfEntity extends Wolf {
+public class SalvaWolfEntity extends WolfismWolfEntity  {
     private int royalGuardTicks = 0;
     private int noblePresenceCooldown = 0;
     private int judgmentBiteCooldown = 0;
@@ -46,8 +60,13 @@ public class SalvaWolfEntity extends Wolf {
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(SalvaWolfEntity.class, EntityDataSerializers.INT);
 
 
-    public SalvaWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public SalvaWolfEntity( EntityType<? extends WolfismWolfEntity> entityType, Level level) {
         super(entityType, level);
+    }
+
+    @Override
+    public boolean supportsCommand( WolfismCommand command) {
+        return command == WolfismCommand.NOBLE_GUARD || super.supportsCommand(command);
     }
 
     public static AttributeSupplier.@NotNull Builder createAttributes() {
@@ -58,6 +77,13 @@ public class SalvaWolfEntity extends Wolf {
                 .add(Attributes.FOLLOW_RANGE, 32.0D)
                 .add(Attributes.ARMOR, 4.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.20D);
+    }
+
+    @Override
+    protected void registerGoals() {
+        super.registerGoals();
+
+        this.goalSelector.addGoal(1, new SalvaWolfNobleGuardCommandGoal(this, 1.2D, 16.0D));
     }
 
     @Override
@@ -273,5 +299,250 @@ public class SalvaWolfEntity extends Wolf {
         }
 
         this.readPersistentAngerSaveData(this.level(), compound);
+    }
+
+    private static class SalvaWolfNobleGuardCommandGoal extends Goal {
+        private final SalvaWolfEntity wolf;
+        private final double speedModifier;
+        private final double guardRange;
+
+        private int targetSearchCooldown;
+        private int attackCooldown;
+        private int supportCooldown;
+        private int repathCooldown;
+
+        public SalvaWolfNobleGuardCommandGoal(SalvaWolfEntity wolf, double speedModifier, double guardRange) {
+            this.wolf = wolf;
+            this.speedModifier = speedModifier;
+            this.guardRange = guardRange;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.wolf.isAlive()
+                    && this.wolf.isTame()
+                    && !this.wolf.isHoldingCommand()
+                    && this.wolf.isInCommand(WolfismCommand.NOBLE_GUARD)
+                    && this.wolf.getOwner() != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public void start() {
+            this.targetSearchCooldown = 0;
+            this.attackCooldown = 0;
+            this.supportCooldown = 0;
+            this.repathCooldown = 0;
+        }
+
+        @Override
+        public void stop() {
+            this.wolf.getNavigation().stop();
+            this.wolf.setTarget(null);
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity owner = this.wolf.getOwner();
+
+            if (owner == null || !owner.isAlive()) {
+                this.wolf.getNavigation().stop();
+                this.wolf.setTarget(null);
+                return;
+            }
+
+            this.tickCooldowns();
+            this.applyNobleProtection(owner);
+
+            LivingEntity target = this.wolf.getTarget();
+
+            if (!this.isValidNobleGuardTarget(target, owner)) {
+                this.wolf.setTarget(null);
+                target = null;
+
+                if (this.targetSearchCooldown <= 0) {
+                    this.targetSearchCooldown = 12;
+                    target = this.findBestNobleGuardTarget(owner);
+                    this.wolf.setTarget(target);
+                }
+            }
+
+            if (target != null && target.isAlive()) {
+                this.moveAndAttackTarget(target);
+                return;
+            }
+
+            this.holdNearOwner(owner);
+        }
+
+        private void tickCooldowns() {
+            if (this.targetSearchCooldown > 0) {
+                this.targetSearchCooldown--;
+            }
+
+            if (this.attackCooldown > 0) {
+                this.attackCooldown--;
+            }
+
+            if (this.supportCooldown > 0) {
+                this.supportCooldown--;
+            }
+
+            if (this.repathCooldown > 0) {
+                this.repathCooldown--;
+            }
+        }
+
+        private void applyNobleProtection(LivingEntity owner) {
+            if (this.supportCooldown > 0) {
+                return;
+            }
+
+            this.supportCooldown = 100;
+
+            boolean dangerNearby = this.findBestNobleGuardTarget(owner) != null;
+
+            if (!dangerNearby) {
+                return;
+            }
+
+            owner.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 80, 0, false, true));
+
+            AABB area = owner.getBoundingBox().inflate(8.0D);
+
+            List<WolfismWolfEntity> nearbyOwnedWolves = this.wolf.level().getEntitiesOfClass(
+                    WolfismWolfEntity.class,
+                    area,
+                    ally -> ally.isAlive()
+                            && ally.isTame()
+                            && ally.getOwnerUUID() != null
+                            && ally.getOwnerUUID().equals(this.wolf.getOwnerUUID())
+            );
+
+            for (WolfismWolfEntity ally : nearbyOwnedWolves) {
+                ally.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 60, 0, false, true));
+            }
+        }
+
+        private LivingEntity findBestNobleGuardTarget(LivingEntity owner) {
+            AABB area = owner.getBoundingBox().inflate(this.guardRange);
+
+            List<LivingEntity> targets = this.wolf.level().getEntitiesOfClass(
+                    LivingEntity.class,
+                    area,
+                    target -> this.isValidNobleGuardTarget(target, owner)
+            );
+
+            return targets.stream()
+                    .min(Comparator
+                            .comparingDouble((LivingEntity target) -> this.getNobleGuardPriorityScore(target, owner))
+                            .thenComparingDouble(this.wolf::distanceToSqr))
+                    .orElse(null);
+        }
+
+        private boolean isValidNobleGuardTarget(LivingEntity target, LivingEntity owner) {
+            if (target == null || !target.isAlive()) {
+                return false;
+            }
+
+            if (target == this.wolf || target == owner) {
+                return false;
+            }
+
+            if (target instanceof Player) {
+                return false;
+            }
+
+            if (!(target instanceof Monster)) {
+                return false;
+            }
+
+            if (!this.wolf.canWolfismTarget(target, false)) {
+                return false;
+            }
+
+            return target.distanceToSqr(owner) <= this.guardRange * this.guardRange;
+        }
+
+        /*
+         * Lower score = higher priority.
+         *
+         * Salva Wolf prefers:
+         * 1. monsters targeting owner
+         * 2. monsters targeting owned wolves
+         * 3. monsters close to owner
+         * 4. monsters close to herself
+         */
+        private double getNobleGuardPriorityScore(LivingEntity target, LivingEntity owner) {
+            double score = target.distanceToSqr(owner);
+
+            if (target instanceof Monster monster) {
+                LivingEntity monsterTarget = monster.getTarget();
+
+                if (monsterTarget == owner) {
+                    score -= 300.0D;
+                }
+
+                if (monsterTarget instanceof TamableAnimal tamable
+                        && tamable.isTame()
+                        && tamable.getOwnerUUID() != null
+                        && tamable.getOwnerUUID().equals(this.wolf.getOwnerUUID())) {
+                    score -= 180.0D;
+                }
+
+                if (monsterTarget == this.wolf) {
+                    score -= 120.0D;
+                }
+            }
+
+            if (target.distanceToSqr(owner) <= 25.0D) {
+                score -= 90.0D;
+            }
+
+            return score;
+        }
+
+        private void moveAndAttackTarget(LivingEntity target) {
+            this.wolf.getLookControl().setLookAt(target, 30.0F, 30.0F);
+
+            if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                this.repathCooldown = 8;
+                this.wolf.getNavigation().moveTo(target, this.speedModifier);
+            }
+
+            if (this.wolf.distanceToSqr(target) <= this.getAttackReachSqr(target)
+                    && this.attackCooldown <= 0) {
+                this.attackCooldown = 22;
+                this.wolf.doHurtTarget(target);
+            }
+        }
+
+        private void holdNearOwner(LivingEntity owner) {
+            double distanceToOwner = this.wolf.distanceToSqr(owner);
+
+            /*
+             * Salva Wolf should feel like a royal guard:
+             * close enough to protect, not wandering away.
+             */
+            if (distanceToOwner > 36.0D) {
+                if (this.repathCooldown <= 0 || this.wolf.getNavigation().isDone()) {
+                    this.repathCooldown = 10;
+                    this.wolf.getNavigation().moveTo(owner, this.speedModifier);
+                }
+            } else {
+                this.wolf.getNavigation().stop();
+                this.wolf.getLookControl().setLookAt(owner, 20.0F, 20.0F);
+            }
+        }
+
+        private double getAttackReachSqr(LivingEntity target) {
+            double attackReach = this.wolf.getBbWidth() * 2.3D + target.getBbWidth();
+            return attackReach * attackReach;
+        }
     }
 }

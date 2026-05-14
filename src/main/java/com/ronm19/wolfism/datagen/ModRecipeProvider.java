@@ -185,6 +185,17 @@ public class ModRecipeProvider extends RecipeProvider implements IConditionBuild
                 .unlockedBy("has_redstone", has(Items.REDSTONE))
                 .save(pRecipeOutput);
 
+        // Wolf Staff
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, ModItems.WOLF_STAFF.get())
+                .pattern("  A")
+                .pattern(" P ")
+                .pattern("S  ")
+                .define('A', Items.AMETHYST_SHARD)
+                .define('P', ModItems.PRIMAL_BONE.get())
+                .define('S', Items.STICK)
+                .unlockedBy("has_primal_bone", has(ModItems.PRIMAL_BONE.get()))
+                .save(pRecipeOutput);
+
         // ---------------------- STORAGE / REVERSIBLE ------------------- //
 
         nineBlockStorageRecipes(pRecipeOutput, RecipeCategory.MISC, ModItems.PRIMAL_BONE.get(), RecipeCategory.BUILDING_BLOCKS, ModBlocks.PRIMAL_BONE_BLOCK.get());

@@ -1,5 +1,6 @@
 package com.ronm19.wolfism.entity.custom.elemental;
 
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -35,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 
-public class WaterWolfEntity extends Wolf {
+public class WaterWolfEntity extends WolfismWolfEntity {
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR =
             SynchedEntityData.defineId(WaterWolfEntity.class, EntityDataSerializers.INT);
@@ -55,7 +56,7 @@ public class WaterWolfEntity extends Wolf {
     private int glowCooldown = 0;
     private int ownerUnderwaterTicks = 0;
 
-    public WaterWolfEntity(EntityType<? extends Wolf> type, Level level) {
+    public WaterWolfEntity(EntityType<? extends WolfismWolfEntity > type, Level level) {
         super(type, level);
         this.setPathfindingMalus(PathType.WATER, 0.0F);
         this.setPathfindingMalus(PathType.WATER_BORDER, 0.0F);

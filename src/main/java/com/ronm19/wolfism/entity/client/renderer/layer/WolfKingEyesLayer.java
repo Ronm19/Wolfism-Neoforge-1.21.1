@@ -3,7 +3,7 @@ package com.ronm19.wolfism.entity.client.renderer.layer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.ronm19.wolfism.WolfismMod;
-import com.ronm19.wolfism.entity.custom.special.WolfKingEntity;
+import com.ronm19.wolfism.entity.custom.elite.WolfKingEntity;
 import net.minecraft.client.model.WolfModel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;

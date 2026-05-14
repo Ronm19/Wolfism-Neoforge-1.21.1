@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.elemental;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -55,7 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FrostWolfEntity extends Wolf {
+public class FrostWolfEntity extends WolfismWolfEntity {
     private final Map<Integer, Integer> frostStacks = new HashMap<>();
     private int retreatCooldown = 0;
     private int packJoinDelay = 0;
@@ -63,7 +64,7 @@ public class FrostWolfEntity extends Wolf {
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
     private static final int FROST_BONE_TAME_CHANCE = 2;
 
-    public FrostWolfEntity(EntityType<? extends Wolf> type, Level level) {
+    public FrostWolfEntity(EntityType<? extends WolfismWolfEntity > type, Level level) {
         super(type, level);
     }
 

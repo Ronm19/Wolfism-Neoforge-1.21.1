@@ -5,6 +5,7 @@ import com.ronm19.wolfism.entity.custom.elemental.*;
 import com.ronm19.wolfism.entity.custom.elite.BloodWolfEntity;
 import com.ronm19.wolfism.entity.custom.elite.LunarWolfEntity;
 import com.ronm19.wolfism.entity.custom.elite.VoidWolfEntity;
+import com.ronm19.wolfism.entity.custom.elite.WolfKingEntity;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.BlackWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.TimberWolfEntity;

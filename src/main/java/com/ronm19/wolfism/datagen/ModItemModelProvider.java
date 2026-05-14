@@ -43,8 +43,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.PRIMAL_BONE.get());
         basicItem(ModItems.SHADOW_BONE.get());
         basicItem(ModItems.EMBER_BONE.get());
-        basicItem(ModItems.SPIRIT_BONE.get());
         basicItem(ModItems.FROST_BONE.get());
+        basicItem(ModItems.SPIRIT_BONE.get());
         basicItem(ModItems.CHARGED_BONE.get());
         basicItem(ModItems.GOLDEN_BONE.get());
         basicItem(ModItems.ARCANE_BONE.get());
@@ -55,6 +55,8 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.VOID_BONE.get());
 
         basicItem(ModItems.BLOOD_GEM.get());
+
+        handheldItem(ModItems.WOLF_STAFF);
 
 
         // -------------------------- ELITE ----------------------------- //
@@ -73,6 +75,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(ModItems.CHERRY_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.ANGEL_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.END_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.WOLF_KING_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
 
 
         // -------------------------- ELEMENTAL ----------------------------- //

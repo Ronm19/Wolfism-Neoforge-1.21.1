@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.*;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -34,13 +36,13 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.pathfinder.PathType;
 import org.jetbrains.annotations.NotNull;
 
-public class ShadowWolfEntity extends Wolf {
+public class ShadowWolfEntity extends WolfismWolfEntity {
 
     private int shadowRepositionCooldown = 0;
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
 
-    public ShadowWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public ShadowWolfEntity(EntityType<? extends WolfismWolfEntity > entityType, Level level) {
         super(entityType, level);
 
         this.setPathfindingMalus(PathType.DANGER_FIRE, -1.0F);
@@ -244,25 +246,8 @@ public class ShadowWolfEntity extends Wolf {
             BlockPos pos,
             RandomSource random
     ) {
-        if (level.getLevel().dimension() != Level.OVERWORLD) {
-            return false;
-        }
-
-        BlockPos below = pos.below();
-
-        boolean validGround = level.getBlockState(below).is(BlockTags.ANIMALS_SPAWNABLE_ON)
-                || level.getBlockState(below).isFaceSturdy(level, below, Direction.UP);
-
-        boolean hasSpace = level.getBlockState(pos).isAir()
-                && level.getBlockState(pos.above()).isAir();
-
-        boolean nightOrDark = level.getLevel().isNight()
-                || level.getBrightness(LightLayer.SKY, pos) <= 7;
-
-        return validGround
-                && hasSpace
-                && nightOrDark
-                && Mob.checkMobSpawnRules(type, level, spawnType, pos, random);
+        return level.getLevel().dimension() == Level.OVERWORLD
+                && Animal.checkAnimalSpawnRules(type, level, spawnType, pos, random);
     }
 
     private static class ShadowWolfStalkGoal extends Goal {

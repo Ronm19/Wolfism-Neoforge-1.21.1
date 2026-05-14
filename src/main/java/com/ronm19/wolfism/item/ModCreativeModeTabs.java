@@ -36,6 +36,7 @@ public class ModCreativeModeTabs {
                         pOutput.accept(ModItems.ROYAL_BONE);
                         pOutput.accept(ModItems.VOID_BONE);
                         pOutput.accept(ModItems.BLOOD_GEM);
+                        pOutput.accept(ModItems.WOLF_STAFF);
 
                     }).build());
 
@@ -89,6 +90,10 @@ public class ModCreativeModeTabs {
                         pOutput.accept(ModItems.LUNAR_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.SALVA_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.VOID_WOLF_SPAWN_EGG);
+
+                        // ------------------------------------ KING --------------------------------- //
+
+                        pOutput.accept(ModItems.WOLF_KING_SPAWN_EGG);
 
 
                     }).build());

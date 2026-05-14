@@ -2,6 +2,7 @@ package com.ronm19.wolfism.entity.custom.neutral;
 
 import com.ronm19.wolfism.WolfismMod;
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
@@ -32,7 +33,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
-public class TimberWolfEntity extends Wolf {
+public class TimberWolfEntity extends WolfismWolfEntity {
 
     private static final ResourceLocation SPEED_BONUS_ID =
             ResourceLocation.fromNamespaceAndPath(WolfismMod.MOD_ID, "timber_woodland_speed");
@@ -42,7 +43,7 @@ public class TimberWolfEntity extends Wolf {
 
     private static final AttributeModifier SPEED_BONUS = new AttributeModifier(SPEED_BONUS_ID, 0.03D, AttributeModifier.Operation.ADD_VALUE);
 
-    public TimberWolfEntity(EntityType<? extends Wolf> type, Level level) {
+    public TimberWolfEntity(EntityType<? extends WolfismWolfEntity > type, Level level) {
         super(type, level);
     }
 

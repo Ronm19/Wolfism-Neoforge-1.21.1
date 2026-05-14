@@ -1,6 +1,8 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.command.WolfismCommand;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
@@ -22,16 +24,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.BegGoal;
-import net.minecraft.world.entity.ai.goal.BreedGoal;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
-import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -53,11 +46,15 @@ import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.animal.horse.ZombieHorse;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.List;
 
-public class AngelWolfEntity extends Wolf {
+public class AngelWolfEntity extends WolfismWolfEntity {
     private static final int OWNER_CLEANSE_COOLDOWN_MAX = 600; // 30 seconds
     private static final int OWNER_HEAL_COOLDOWN_MAX = 140;    // 7 seconds
     private static final int SELF_HEAL_COOLDOWN_MAX = 180;     // 9 seconds
@@ -68,7 +65,7 @@ public class AngelWolfEntity extends Wolf {
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
 
-    public AngelWolfEntity( EntityType<? extends Wolf> entityType, Level level ) {
+    public AngelWolfEntity( EntityType<? extends WolfismWolfEntity > entityType, Level level ) {
         super(entityType, level);
     }
 
@@ -88,7 +85,8 @@ public class AngelWolfEntity extends Wolf {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new AngelWolfProtectCommandGoal(this, 1.25D, 18.0D));
         this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
 
         this.goalSelector.addGoal(3, new LeapAtTargetGoal(this, 0.4F));
@@ -126,6 +124,11 @@ public class AngelWolfEntity extends Wolf {
                 || target instanceof SkeletonHorse
                 || target instanceof ZombieHorse
                 || target instanceof Zoglin;
+    }
+
+    @Override
+    public boolean supportsCommand(WolfismCommand command) {
+        return command == WolfismCommand.PROTECT || super.supportsCommand(command);
     }
 
     @Override
@@ -435,5 +438,188 @@ public class AngelWolfEntity extends Wolf {
     }
     static {
         DATA_COLLAR_COLOR = SynchedEntityData.defineId(AngelWolfEntity.class, EntityDataSerializers.INT);
+    }
+
+    private static class AngelWolfProtectCommandGoal extends Goal {
+        private final AngelWolfEntity wolf;
+        private final double speedModifier;
+        private final double protectRange;
+
+        private int healCooldown;
+        private int targetSearchCooldown;
+        private int attackCooldown;
+
+        public AngelWolfProtectCommandGoal(AngelWolfEntity wolf, double speedModifier, double protectRange) {
+            this.wolf = wolf;
+            this.speedModifier = speedModifier;
+            this.protectRange = protectRange;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.wolf.isAlive()
+                    && this.wolf.isTame()
+                    && !this.wolf.isHoldingCommand()
+                    && this.wolf.isInCommand(WolfismCommand.PROTECT)
+                    && this.wolf.getOwner() != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity owner = this.wolf.getOwner();
+
+            if (owner == null || !owner.isAlive()) {
+                this.wolf.getNavigation().stop();
+                return;
+            }
+
+            if (this.healCooldown > 0) {
+                this.healCooldown--;
+            }
+
+            if (this.targetSearchCooldown > 0) {
+                this.targetSearchCooldown--;
+            }
+
+            if (this.attackCooldown > 0) {
+                this.attackCooldown--;
+            }
+
+            this.supportOwnerAndAllies(owner);
+
+            LivingEntity target = this.wolf.getTarget();
+
+            if (target == null || !target.isAlive() || !this.canAngelProtectTarget(target, owner)) {
+                if (this.targetSearchCooldown <= 0) {
+                    this.targetSearchCooldown = 15;
+                    target = this.findBestProtectTarget(owner);
+                    this.wolf.setTarget(target);
+                }
+            }
+
+            if (target != null && target.isAlive() && this.canAngelProtectTarget(target, owner)) {
+                this.moveAndAttackTarget(target);
+                return;
+            }
+
+            this.stayNearOwner(owner);
+        }
+
+        private void supportOwnerAndAllies(LivingEntity owner) {
+            if (this.healCooldown > 0) {
+                return;
+            }
+
+            this.healCooldown = 80;
+
+            if (owner.getHealth() < owner.getMaxHealth()) {
+                owner.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 80, 0, false, true));
+            }
+
+            AABB area = this.wolf.getBoundingBox().inflate(8.0D);
+
+            List<WolfismWolfEntity> nearbyOwnedWolves = this.wolf.level().getEntitiesOfClass(
+                    WolfismWolfEntity.class,
+                    area,
+                    ally -> ally.isAlive()
+                            && ally.isTame()
+                            && ally.getOwnerUUID() != null
+                            && ally.getOwnerUUID().equals(this.wolf.getOwnerUUID())
+                            && ally.getHealth() < ally.getMaxHealth()
+            );
+
+            for (WolfismWolfEntity ally : nearbyOwnedWolves) {
+                ally.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 60, 0, false, true));
+            }
+        }
+
+        private LivingEntity findBestProtectTarget(LivingEntity owner) {
+            AABB area = owner.getBoundingBox().inflate(this.protectRange);
+
+            List<LivingEntity> targets = this.wolf.level().getEntitiesOfClass(
+                    LivingEntity.class,
+                    area,
+                    target -> this.canAngelProtectTarget(target, owner)
+            );
+
+            return targets.stream()
+                    .min(Comparator
+                            .comparingDouble((LivingEntity target) -> this.getProtectPriorityScore(target, owner))
+                            .thenComparingDouble(this.wolf::distanceToSqr))
+                    .orElse(null);
+        }
+
+        private boolean canAngelProtectTarget(LivingEntity target, LivingEntity owner) {
+            if (target == null || !target.isAlive()) {
+                return false;
+            }
+
+            if (!(target instanceof Monster)) {
+                return false;
+            }
+
+            if (!this.wolf.canWolfismTarget(target, false)) {
+                return false;
+            }
+
+            double distanceToOwner = target.distanceToSqr(owner);
+
+            return distanceToOwner <= this.protectRange * this.protectRange;
+        }
+
+        /*
+         * Lower score = higher priority.
+         *
+         * Angel Wolf prefers:
+         * 1. monsters targeting owner
+         * 2. monsters very close to owner
+         * 3. monsters close to herself
+         */
+        private double getProtectPriorityScore(LivingEntity target, LivingEntity owner) {
+            double score = target.distanceToSqr(owner);
+
+            if (target instanceof Monster monster && monster.getTarget() == owner) {
+                score -= 200.0D;
+            }
+
+            if (target.distanceToSqr(owner) <= 16.0D) {
+                score -= 80.0D;
+            }
+
+            return score;
+        }
+
+        private void moveAndAttackTarget(LivingEntity target) {
+            this.wolf.getLookControl().setLookAt(target, 30.0F, 30.0F);
+            this.wolf.getNavigation().moveTo(target, this.speedModifier);
+
+            if (this.wolf.distanceToSqr(target) <= this.getAttackReachSqr(target)
+                    && this.attackCooldown <= 0) {
+                this.attackCooldown = 20;
+                this.wolf.doHurtTarget(target);
+            }
+        }
+
+        private void stayNearOwner(LivingEntity owner) {
+            double distanceToOwner = this.wolf.distanceToSqr(owner);
+
+            if (distanceToOwner > 36.0D) {
+                this.wolf.getNavigation().moveTo(owner, this.speedModifier);
+            } else {
+                this.wolf.getNavigation().stop();
+                this.wolf.getLookControl().setLookAt(owner, 20.0F, 20.0F);
+            }
+        }
+
+        private double getAttackReachSqr(LivingEntity target) {
+            double attackReach = this.wolf.getBbWidth() * 2.2D + target.getBbWidth();
+            return attackReach * attackReach;
+        }
     }
 }

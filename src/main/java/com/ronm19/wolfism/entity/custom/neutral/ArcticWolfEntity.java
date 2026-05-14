@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.neutral;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.entity.custom.elite.BloodWolfEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -19,11 +20,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ArcticWolfEntity extends Wolf {
+public class ArcticWolfEntity extends WolfismWolfEntity {
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
 
-    public ArcticWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public ArcticWolfEntity(EntityType<? extends WolfismWolfEntity > entityType, Level level) {
         super(entityType, level);
     }
 

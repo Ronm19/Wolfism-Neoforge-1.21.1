@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.elemental;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -38,7 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class StormWolfEntity extends Wolf {
+public class StormWolfEntity extends WolfismWolfEntity {
 
     private static final EntityDataAccessor<Boolean> CHARGED =
             SynchedEntityData.defineId(StormWolfEntity.class, EntityDataSerializers.BOOLEAN);
@@ -48,7 +49,7 @@ public class StormWolfEntity extends Wolf {
 
     private int packCallCooldown = 0;
 
-    public StormWolfEntity(EntityType<? extends Wolf> type, Level level) {
+    public StormWolfEntity(EntityType<? extends WolfismWolfEntity > type, Level level) {
         super(type, level);
     }
 

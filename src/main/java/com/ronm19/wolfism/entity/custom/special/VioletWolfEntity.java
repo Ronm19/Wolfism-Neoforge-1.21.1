@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -33,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class VioletWolfEntity extends Wolf {
+public class VioletWolfEntity extends WolfismWolfEntity {
     private static final EntityDataAccessor<Boolean> DATA_PULSE_ACTIVE =
             SynchedEntityData.defineId(VioletWolfEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -46,7 +47,7 @@ public class VioletWolfEntity extends Wolf {
     private int arcanePulseCooldown = 0;
     private int arcanePulseActiveTicks = 0;
 
-    public VioletWolfEntity(EntityType<? extends Wolf> entityType, Level level) {
+    public VioletWolfEntity(EntityType<? extends WolfismWolfEntity > entityType, Level level) {
         super(entityType, level);
     }
 

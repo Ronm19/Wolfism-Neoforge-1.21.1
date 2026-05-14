@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -22,7 +23,6 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +33,7 @@ import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class EndWolfEntity extends Wolf {
+public class EndWolfEntity extends WolfismWolfEntity {
     private static final int OWNER_TELEPORT_COOLDOWN = 80;
     private static final int DEFENSIVE_TELEPORT_COOLDOWN = 120;
 
@@ -41,11 +41,11 @@ public class EndWolfEntity extends Wolf {
 
     private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR;
 
-    public EndWolfEntity(EntityType<? extends EndWolfEntity> type, Level level) {
+    public EndWolfEntity(EntityType<? extends WolfismWolfEntity > type, Level level) {
         super(type, level);
     }
 
-    public static AttributeSupplier.Builder createAttributes() {
+    public static AttributeSupplier.@NotNull Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 26.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.32D)

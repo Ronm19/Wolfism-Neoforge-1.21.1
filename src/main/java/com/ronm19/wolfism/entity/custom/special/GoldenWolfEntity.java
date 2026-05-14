@@ -1,6 +1,7 @@
 package com.ronm19.wolfism.entity.custom.special;
 
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.base.WolfismWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.core.BlockPos;
@@ -34,7 +35,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class GoldenWolfEntity extends Wolf {
+public class GoldenWolfEntity extends WolfismWolfEntity  {
     private static final int GOLDEN_COURAGE_CHECK_INTERVAL = 40;
     private static final int GOLDEN_BLESSING_COOLDOWN_TICKS = 20 * 25;
 
@@ -43,7 +44,7 @@ public class GoldenWolfEntity extends Wolf {
 
     private int goldenBlessingCooldown = 0;
 
-    public GoldenWolfEntity(EntityType<? extends Wolf> entityType, net.minecraft.world.level.Level level) {
+    public GoldenWolfEntity( EntityType<? extends WolfismWolfEntity> entityType, net.minecraft.world.level.Level level) {
         super(entityType, level);
     }
 
