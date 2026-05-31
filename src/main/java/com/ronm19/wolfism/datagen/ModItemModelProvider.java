@@ -50,6 +50,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         basicItem(ModItems.ARCANE_BONE.get());
         basicItem(ModItems.ANGEL_BONE.get());
         basicItem(ModItems.LUNAR_BONE.get());
+        basicItem(ModItems.WITHER_BONE.get());
         basicItem(ModItems.BLOOD_BONE.get());
         basicItem(ModItems.ROYAL_BONE.get());
         basicItem(ModItems.VOID_BONE.get());
@@ -63,6 +64,7 @@ public class ModItemModelProvider extends ItemModelProvider {
 
         withExistingParent(ModItems.BLOOD_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.LUNAR_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.GRIM_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.SALVA_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.VOID_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
 
@@ -74,6 +76,12 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent(ModItems.VIOLET_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.CHERRY_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.ANGEL_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.ZOMBIE_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.CRYSTAL_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.HUSK_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.DROWNED_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.WITHERED_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
+        withExistingParent(ModItems.SKELETON_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.END_WOLF_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
         withExistingParent(ModItems.WOLF_KING_SPAWN_EGG.getId().getPath(), mcLoc("item/template_spawn_egg"));
 

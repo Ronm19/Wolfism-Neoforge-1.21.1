@@ -1,0 +1,14 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [
+    "minecraft:soul_sand_valley",
+    "minecraft:nether_wastes",
+    "minecraft:basalt_deltas"
+  ],
+  "spawners": {
+    "type": "wolfism:withered_wolf",
+    "weight": 5,
+    "minCount": 1,
+    "maxCount": 1
+  }
+}

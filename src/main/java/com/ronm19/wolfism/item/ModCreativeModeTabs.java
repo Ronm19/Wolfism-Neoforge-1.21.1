@@ -33,6 +33,7 @@ public class ModCreativeModeTabs {
                         pOutput.accept(ModItems.ANGEL_BONE);
                         pOutput.accept(ModItems.BLOOD_BONE);
                         pOutput.accept(ModItems.LUNAR_BONE);
+                        pOutput.accept(ModItems.WITHER_BONE);
                         pOutput.accept(ModItems.ROYAL_BONE);
                         pOutput.accept(ModItems.VOID_BONE);
                         pOutput.accept(ModItems.BLOOD_GEM);
@@ -80,14 +81,21 @@ public class ModCreativeModeTabs {
                         pOutput.accept(ModItems.GOLDEN_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.VIOLET_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.CHERRY_WOLF_SPAWN_EGG);
+                        pOutput.accept(ModItems.CRYSTAL_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.ANGEL_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.END_WOLF_SPAWN_EGG);
+                        pOutput.accept(ModItems.ZOMBIE_WOLF_SPAWN_EGG);
+                        pOutput.accept(ModItems.HUSK_WOLF_SPAWN_EGG);
+                        pOutput.accept(ModItems.DROWNED_WOLF_SPAWN_EGG);
+                        pOutput.accept(ModItems.SKELETON_WOLF_SPAWN_EGG);
 
 
                         // ------------------------------------ ELITE --------------------------------- //
 
                         pOutput.accept(ModItems.BLOOD_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.LUNAR_WOLF_SPAWN_EGG);
+                        pOutput.accept(ModItems.GRIM_WOLF_SPAWN_EGG);
+                        pOutput.accept(ModItems.WITHERED_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.SALVA_WOLF_SPAWN_EGG);
                         pOutput.accept(ModItems.VOID_WOLF_SPAWN_EGG);
 

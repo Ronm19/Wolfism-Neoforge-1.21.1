@@ -1,44 +1,25 @@
 package com.ronm19.wolfism;
 
+import com.mojang.logging.LogUtils;
 import com.ronm19.wolfism.block.ModBlocks;
 import com.ronm19.wolfism.entity.ModEntities;
 import com.ronm19.wolfism.entity.client.renderer.*;
 import com.ronm19.wolfism.item.ModCreativeModeTabs;
 import com.ronm19.wolfism.item.ModItems;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import org.slf4j.Logger;
-
-import com.mojang.logging.LogUtils;
-
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraft.client.Minecraft;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(WolfismMod.MOD_ID)
@@ -111,12 +92,20 @@ public class WolfismMod {
             EntityRenderers.register(ModEntities.VIOLET_WOLF.get(), VioletWolfRenderer::new);
             EntityRenderers.register(ModEntities.CHERRY_WOLF.get(), CherryWolfRenderer::new);
             EntityRenderers.register(ModEntities.ANGEL_WOLF.get(), AngelWolfRenderer::new);
+            EntityRenderers.register(ModEntities.ZOMBIE_WOLF.get(), ZombieWolfRenderer::new);
+            EntityRenderers.register(ModEntities.HUSK_WOLF.get(), HuskWolfRenderer::new);
+            EntityRenderers.register(ModEntities.SKELETON_WOLF.get(), SkeletonWolfRenderer::new);
+            EntityRenderers.register(ModEntities.DROWNED_WOLF.get(), DrownedWolfRenderer::new);
+            EntityRenderers.register(ModEntities.CRYSTAL_WOLF.get(), CrystalWolfRenderer::new);
             EntityRenderers.register(ModEntities.END_WOLF.get(), EndWolfRenderer::new);
+
 
             // ---------------------- ELITE ----------------------- //
 
             EntityRenderers.register(ModEntities.BLOOD_WOLF.get(), BloodWolfRenderer::new);
             EntityRenderers.register(ModEntities.LUNAR_WOLF.get(), LunarWolfRenderer::new);
+            EntityRenderers.register(ModEntities.GRIM_WOLF.get(), GrimWolfRenderer::new);
+            EntityRenderers.register(ModEntities.WITHERED_WOLF.get(), WitheredWolfRenderer::new);
             EntityRenderers.register(ModEntities.SALVA_WOLF.get(), SalvaWolfRenderer::new);
             EntityRenderers.register(ModEntities.VOID_WOLF.get(), VoidWolfRenderer::new);
             EntityRenderers.register(ModEntities.WOLF_KING.get(), WolfKingRenderer::new);

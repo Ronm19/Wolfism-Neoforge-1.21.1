@@ -1,11 +1,9 @@
 package com.ronm19.wolfism.entity;
 
 import com.ronm19.wolfism.WolfismMod;
+import com.ronm19.wolfism.entity.custom.elite.WitheredWolfEntity;
 import com.ronm19.wolfism.entity.custom.elemental.*;
-import com.ronm19.wolfism.entity.custom.elite.BloodWolfEntity;
-import com.ronm19.wolfism.entity.custom.elite.LunarWolfEntity;
-import com.ronm19.wolfism.entity.custom.elite.VoidWolfEntity;
-import com.ronm19.wolfism.entity.custom.elite.WolfKingEntity;
+import com.ronm19.wolfism.entity.custom.elite.*;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.BlackWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.TimberWolfEntity;
@@ -88,13 +86,32 @@ public class ModEntities {
             ENTITY_TYPES.register("angel_wolf", () -> EntityType.Builder.of(AngelWolfEntity::new, MobCategory.CREATURE)
                     .sized(0.6F, 0.85F).build("angel_wolf"));
 
+    public static final Supplier<EntityType<CrystalWolfEntity>> CRYSTAL_WOLF =
+            ENTITY_TYPES.register("crystal_wolf", () -> EntityType.Builder.of(CrystalWolfEntity::new, MobCategory.CREATURE)
+                    .sized(0.6F, 0.85F).build("crystal_wolf"));
+
     public static final Supplier<EntityType<EndWolfEntity>> END_WOLF =
             ENTITY_TYPES.register("end_wolf", () -> EntityType.Builder.of(EndWolfEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 0.85F).build("end_wolf"));
 
-    public static final Supplier<EntityType<WolfKingEntity>> WOLF_KING =
-            ENTITY_TYPES.register("wolf_king", () -> EntityType.Builder.of(WolfKingEntity::new, MobCategory.CREATURE)
-                    .sized(0.6F, 0.85F).build("wolf_king"));
+    public static final Supplier<EntityType<ZombieWolfEntity>> ZOMBIE_WOLF =
+            ENTITY_TYPES.register("zombie_wolf", () -> EntityType.Builder.of(ZombieWolfEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 0.85F).build("zombie_wolf"));
+
+
+    public static final Supplier<EntityType<SkeletonWolfEntity>> SKELETON_WOLF =
+            ENTITY_TYPES.register("skeleton_wolf", () -> EntityType.Builder.of(SkeletonWolfEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 0.85F).build("skeleton_wolf"));
+
+
+    public static final Supplier<EntityType<HuskWolfEntity>> HUSK_WOLF =
+            ENTITY_TYPES.register("husk_wolf", () -> EntityType.Builder.of(HuskWolfEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 0.85F).build("husk_wolf"));
+
+
+    public static final Supplier<EntityType<DrownedWolfEntity>> DROWNED_WOLF =
+            ENTITY_TYPES.register("drowned_wolf", () -> EntityType.Builder.of(DrownedWolfEntity::new, MobCategory.CREATURE)
+                    .sized(0.6F, 0.85F).build("drowned_wolf"));
 
     // ------------------------------------ ELITE WOLFS --------------------------------- //
 
@@ -106,6 +123,14 @@ public class ModEntities {
             ENTITY_TYPES.register("lunar_wolf", () -> EntityType.Builder.of(LunarWolfEntity ::new, MobCategory.CREATURE)
                     .sized(0.6F, 0.85F).clientTrackingRange(10).updateInterval(3).build("lunar_wolf"));
 
+    public static final Supplier<EntityType<GrimWolfEntity>> GRIM_WOLF =
+            ENTITY_TYPES.register("grim_wolf", () -> EntityType.Builder.of(GrimWolfEntity ::new, MobCategory.MONSTER)
+                    .sized(0.6F, 0.85F).clientTrackingRange(10).updateInterval(3).build("grim_wolf"));
+
+    public static final Supplier<EntityType<WitheredWolfEntity>> WITHERED_WOLF =
+            ENTITY_TYPES.register("withered_wolf", () -> EntityType.Builder.of(WitheredWolfEntity ::new, MobCategory.MONSTER)
+                    .sized(0.6F, 0.85F).clientTrackingRange(10).updateInterval(3).build("withered_wolf"));
+
     public static final Supplier<EntityType<SalvaWolfEntity>> SALVA_WOLF =
             ENTITY_TYPES.register("salva_wolf", () -> EntityType.Builder.of(SalvaWolfEntity::new, MobCategory.CREATURE)
                     .sized(0.6F, 0.85F).build("salva_wolf"));
@@ -113,6 +138,14 @@ public class ModEntities {
     public static final Supplier<EntityType<VoidWolfEntity>> VOID_WOLF =
             ENTITY_TYPES.register("void_wolf", () -> EntityType.Builder.of(VoidWolfEntity::new, MobCategory.MONSTER)
                     .sized(0.6F, 0.85F).build("void_wolf"));
+
+
+    // -------------------------------------- WOLF KING ------------------------------------------ //
+
+
+    public static final Supplier<EntityType<WolfKingEntity>> WOLF_KING =
+            ENTITY_TYPES.register("wolf_king", () -> EntityType.Builder.of(WolfKingEntity::new, MobCategory.CREATURE)
+                    .sized(0.6F, 0.85F).build("wolf_king"));
 
     // ------------------------------------ BOSSEs --------------------------------- //
 

@@ -673,17 +673,6 @@ public class CherryWolfEntity extends WolfismWolfEntity {
         return 0.0F;
     }
 
-    public static boolean canSpawn(
-            EntityType<CherryWolfEntity> type,
-            ServerLevelAccessor level,
-            MobSpawnType spawnType,
-            BlockPos pos,
-            RandomSource random
-    ) {
-        return level.getLevel().dimension() == Level.OVERWORLD
-                && Animal.checkAnimalSpawnRules(type, level, spawnType, pos, random);
-    }
-
     public void addAdditionalSaveData( @NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putByte("CollarColor", (byte) this.getCollarColor().getId());

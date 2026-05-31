@@ -4,7 +4,6 @@ import com.ronm19.wolfism.WolfismMod;
 import com.ronm19.wolfism.entity.ModEntities;
 import com.ronm19.wolfism.item.custom.WolfStaffItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SpawnEggItem;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -26,6 +25,7 @@ public class ModItems {
     public static final DeferredItem<Item> BLOOD_BONE = ITEMS.registerItem("blood_bone", Item::new, new Item.Properties());
     public static final DeferredItem<Item> ANGEL_BONE = ITEMS.registerItem("angel_bone", Item::new, new Item.Properties());
     public static final DeferredItem<Item> LUNAR_BONE = ITEMS.registerItem("lunar_bone", Item::new, new Item.Properties());
+    public static final DeferredItem<Item> WITHER_BONE = ITEMS.registerItem("wither_bone", Item::new, new Item.Properties());
     public static final DeferredItem<Item> ROYAL_BONE = ITEMS.registerItem("royal_bone", Item::new, new Item.Properties());
     public static final DeferredItem<Item> VOID_BONE = ITEMS.registerItem("void_bone", Item::new, new Item.Properties());
 
@@ -94,6 +94,21 @@ public class ModItems {
     public static final DeferredItem<Item> ANGEL_WOLF_SPAWN_EGG = ITEMS.register("angel_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.ANGEL_WOLF, 0xFFF8E1, 0xF5C542, new Item.Properties()));
 
+    public static final DeferredItem<Item> ZOMBIE_WOLF_SPAWN_EGG = ITEMS.register("zombie_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.ZOMBIE_WOLF, 0x4A5638, 0xE8C8D0, new Item.Properties()));
+
+    public static final DeferredItem<Item> HUSK_WOLF_SPAWN_EGG = ITEMS.register("husk_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.HUSK_WOLF, 0xB8A06A, 0xE7D7A1, new Item.Properties()));
+
+    public static final DeferredItem<Item> SKELETON_WOLF_SPAWN_EGG = ITEMS.register("skeleton_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.SKELETON_WOLF, 0xC8C3B5, 0xF2F2E6 , new Item.Properties()));
+
+    public static final DeferredItem<Item> CRYSTAL_WOLF_SPAWN_EGG = ITEMS.register("crystal_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.CRYSTAL_WOLF, 0x8E7CC3, 0xD9F7FF, new Item.Properties()));
+
+    public static final DeferredItem<Item> DROWNED_WOLF_SPAWN_EGG = ITEMS.register("drowned_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.DROWNED_WOLF, 0x2F6F73, 0x8FE6D0, new Item.Properties()));
+
     public static final DeferredItem<Item> END_WOLF_SPAWN_EGG = ITEMS.register("end_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.END_WOLF, 0x0A0612, 0x7A3CFF, new Item.Properties()));
 
@@ -104,6 +119,13 @@ public class ModItems {
 
     public static final DeferredItem<DeferredSpawnEggItem> LUNAR_WOLF_SPAWN_EGG = ITEMS.register("lunar_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.LUNAR_WOLF, 0x0B1020, 0x9FE8FF, new Item.Properties()));
+
+    public static final DeferredItem<Item> GRIM_WOLF_SPAWN_EGG = ITEMS.register("grim_wolf_spawn_egg",
+                    () -> new DeferredSpawnEggItem(ModEntities.GRIM_WOLF, 0x1E1E26, 0xA66BE8, new Item.Properties()));
+
+    public static final DeferredItem<Item> WITHERED_WOLF_SPAWN_EGG = ITEMS.register("withered_wolf_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.WITHERED_WOLF, 0x1F2122, 0xB7D8D0 , new Item.Properties()));
+
 
     public static final DeferredItem<DeferredSpawnEggItem> SALVA_WOLF_SPAWN_EGG = ITEMS.register("salva_wolf_spawn_egg",
             () -> new DeferredSpawnEggItem(ModEntities.SALVA_WOLF, 0x3A2414, 0xC58A16, new Item.Properties()));

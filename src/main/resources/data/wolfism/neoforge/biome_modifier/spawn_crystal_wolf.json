@@ -1,0 +1,16 @@
+{
+  "type": "neoforge:add_spawns",
+  "biomes": [
+    "minecraft:meadow",
+    "minecraft:stony_peaks",
+    "minecraft:jagged_peaks",
+    "minecraft:frozen_peaks",
+    "minecraft:grove"
+  ],
+  "spawners": {
+    "type": "wolfism:crystal_wolf",
+    "weight": 80,
+    "minCount": 1,
+    "maxCount": 1
+  }
+}

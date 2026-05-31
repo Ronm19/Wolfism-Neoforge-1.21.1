@@ -10,6 +10,7 @@
   "item.wolfism.blood_bone": "Blood Bone",
   "item.wolfism.golden_bone": "Golden Bone",
   "item.wolfism.arcane_bone": "Arcane Bone",
+  "item.wolfism.wither_bone": "Wither Bone",
   "item.wolfism.angel_bone": "Angel Bone",
   "item.wolfism.lunar_bone": "Lunar Bone",
   "item.wolfism.royal_bone": "Royal Bone",
@@ -68,6 +69,21 @@
   "item.wolfism.cherry_wolf_spawn_egg": "Cherry Wolf Spawn Egg",
   "entity.wolfism.cherry_wolf": "Cherry Wolf",
 
+  "item.wolfism.crystal_wolf_spawn_egg": "Crystal Wolf Spawn Egg",
+  "entity.wolfism.crystal_wolf": "Crystal Wolf",
+
+  "item.wolfism.zombie_wolf_spawn_egg": "Zombie Wolf Spawn Egg",
+  "entity.wolfism.zombie_wolf": "Zombie Wolf",
+
+  "item.wolfism.husk_wolf_spawn_egg": "Husk Wolf Spawn Egg",
+  "entity.wolfism.husk_wolf": "Husk Wolf",
+
+  "item.wolfism.skeleton_wolf_spawn_egg": "Skeleton Wolf Spawn Egg",
+  "entity.wolfism.skeleton_wolf": "Skeleton Wolf",
+
+  "item.wolfism.drowned_wolf_spawn_egg": "Drowned Wolf Spawn Egg",
+  "entity.wolfism.drowned_wolf": "Drowned Wolf",
+
   "item.wolfism.angel_wolf_spawn_egg": "Angel Wolf Spawn Egg",
   "entity.wolfism.angel_wolf": "Angel Wolf",
 
@@ -83,6 +99,12 @@
 
   "item.wolfism.lunar_wolf_spawn_egg": "Lunar Wolf Spawn Egg",
   "entity.wolfism.lunar_wolf": "Lunar Wolf",
+
+  "item.wolfism.grim_wolf_spawn_egg": "Grim Wolf Spawn Egg",
+  "entity.wolfism.grim_wolf": "Grim Wolf",
+
+  "item.wolfism.withered_wolf_spawn_egg": "Withered Wolf Spawn Egg",
+  "entity.wolfism.withered_wolf": "Withered Wolf",
 
   "item.wolfism.salva_wolf_spawn_egg": "Salva Wolf Spawn Egg",
   "entity.wolfism.salva_wolf": "Salva Wolf",

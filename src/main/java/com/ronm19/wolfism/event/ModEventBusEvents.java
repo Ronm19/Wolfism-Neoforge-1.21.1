@@ -2,11 +2,9 @@ package com.ronm19.wolfism.event;
 
 import com.ronm19.wolfism.WolfismMod;
 import com.ronm19.wolfism.entity.ModEntities;
+import com.ronm19.wolfism.entity.custom.elite.WitheredWolfEntity;
 import com.ronm19.wolfism.entity.custom.elemental.*;
-import com.ronm19.wolfism.entity.custom.elite.BloodWolfEntity;
-import com.ronm19.wolfism.entity.custom.elite.LunarWolfEntity;
-import com.ronm19.wolfism.entity.custom.elite.VoidWolfEntity;
-import com.ronm19.wolfism.entity.custom.elite.WolfKingEntity;
+import com.ronm19.wolfism.entity.custom.elite.*;
 import com.ronm19.wolfism.entity.custom.neutral.ArcticWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.BlackWolfEntity;
 import com.ronm19.wolfism.entity.custom.neutral.TimberWolfEntity;
@@ -62,12 +60,19 @@ public class ModEventBusEvents {
         event.put(ModEntities.CHERRY_WOLF.get(), CherryWolfEntity.createAttributes().build());
         event.put(ModEntities.ANGEL_WOLF.get(), AngelWolfEntity.createAttributes().build());
         event.put(ModEntities.END_WOLF.get(), EndWolfEntity.createAttributes().build());
+        event.put(ModEntities.ZOMBIE_WOLF.get(), ZombieWolfEntity.createAttributes().build());
+        event.put(ModEntities.SKELETON_WOLF.get(), SkeletonWolfEntity.createAttributes().build());
+        event.put(ModEntities.HUSK_WOLF.get(), HuskWolfEntity.createAttributes().build());
+        event.put(ModEntities.CRYSTAL_WOLF.get(), CrystalWolfEntity.createAttributes().build());
+        event.put(ModEntities.DROWNED_WOLF.get(), DrownedWolfEntity.createAttributes().build());
         event.put(ModEntities.WOLF_KING.get(), WolfKingEntity.createAttributes().build());
 
         // * --------------- ELITE -------------------------- * //
 
         event.put(ModEntities.BLOOD_WOLF.get(), BloodWolfEntity.createAttributes().build());
         event.put(ModEntities.LUNAR_WOLF.get(), LunarWolfEntity.createAttributes().build());
+        event.put(ModEntities.GRIM_WOLF.get(), GrimWolfEntity.createAttributes().build());
+        event.put(ModEntities.WITHERED_WOLF.get(), WitheredWolfEntity.createAttributes().build());
         event.put(ModEntities.SALVA_WOLF.get(), SalvaWolfEntity.createAttributes().build());
         event.put(ModEntities.VOID_WOLF.get(), VoidWolfEntity.createAttributes().build());
     }
@@ -94,6 +99,22 @@ public class ModEventBusEvents {
         );
 
         event.register(
+                ModEntities.GRIM_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                GrimWolfEntity ::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
+                ModEntities.WITHERED_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                WitheredWolfEntity::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
                 ModEntities.SALVA_WOLF.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
@@ -108,6 +129,7 @@ public class ModEventBusEvents {
                 VoidWolfEntity ::canSpawn,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
+
 
         // ------------------------------------ SPECIAL --------------------------------- //
 
@@ -144,10 +166,50 @@ public class ModEventBusEvents {
         );
 
         event.register(
+                ModEntities.CRYSTAL_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                CrystalWolfEntity::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
+                ModEntities.ZOMBIE_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                ZombieWolfEntity::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
+                ModEntities.HUSK_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                HuskWolfEntity::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
+                ModEntities.SKELETON_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                SkeletonWolfEntity::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
+                ModEntities.DROWNED_WOLF.get(),
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                DrownedWolfEntity::canSpawn,
+                RegisterSpawnPlacementsEvent.Operation.REPLACE
+        );
+
+        event.register(
                 ModEntities.CHERRY_WOLF.get(),
                 SpawnPlacementTypes.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                CherryWolfEntity ::canSpawn,
+                CherryWolfEntity ::checkAnimalSpawnRules,
                 RegisterSpawnPlacementsEvent.Operation.REPLACE
         );
 
